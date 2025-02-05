@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
-# Archivo: update_flask_deployment.py
-# Este script actualiza el archivo flask_deployment_template.yaml sustituyendo el placeholder
-# en la variable de entorno MLFLOW_MODEL_URI por la URI actual del modelo obtenido de MLflow.
+# Archivo: update_mlserver_deployment.py
 
 import os
 import sys
@@ -17,13 +15,13 @@ def update_yaml(template_file, output_file, model_uri):
         print(f"[ERROR] No se pudo leer el archivo {template_file}: {e}")
         sys.exit(1)
 
-    # Iteramos sobre cada documento buscando el Deployment
+    # Buscamos en cada documento el Deployment para actualizar la variable de entorno
     for doc in docs:
         if doc.get("kind") == "Deployment":
             try:
                 containers = doc["spec"]["template"]["spec"]["containers"]
                 for container in containers:
-                    if container.get("name") == "flask-model":
+                    if container.get("name") == "mlflow-model-server":
                         env_vars = container.get("env", [])
                         updated = False
                         for env_var in env_vars:
@@ -46,12 +44,16 @@ def update_yaml(template_file, output_file, model_uri):
         sys.exit(1)
 
 
-if __name__ == "__main__":
+def main():
     if len(sys.argv) != 2:
-        print("Uso: python update_flask_deployment.py <model_uri>")
+        print("Uso: python update_mlserver_deployment.py <MLFLOW_MODEL_URI>")
         sys.exit(1)
 
     model_uri = sys.argv[1]
-    template_file = "flask_deployment_template.yaml"
-    output_file = "flask_deployment.yaml"
+    template_file = "mlflow_deployment_template.yaml"  # Asegúrate de que este archivo exista.
+    output_file = "mlflow_deployment.yaml"  # Este es el archivo que se aplicará en Kubernetes.
     update_yaml(template_file, output_file, model_uri)
+
+
+if __name__ == "__main__":
+    main()

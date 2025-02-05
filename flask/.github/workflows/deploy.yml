@@ -1,5 +1,5 @@
 # Archivo: .github/workflows/deploy.yml
-name: Deploy Flask Model
+name: Deploy MLflow Model Server
 
 on:
   push:
@@ -20,32 +20,25 @@ jobs:
       with:
         python-version: "3.9"
 
-    - name: Instalar dependencias de Python para update script
+    - name: Instalar dependencias para el script de actualización
       run: |
         python -m pip install --upgrade pip
         pip install pyyaml
 
     - name: Construir la imagen Docker
       run: |
-        docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/flask-model:latest .
+        docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/mlflow-model-server:latest .
 
     - name: Iniciar sesión en Docker Hub
       run: echo "${{ secrets.DOCKERHUB_PASSWORD }}" | docker login --username ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
 
     - name: Push de la imagen a Docker Hub
       run: |
-        docker push ${{ secrets.DOCKERHUB_USERNAME }}/flask-model:latest
+        docker push ${{ secrets.DOCKERHUB_USERNAME }}/mlflow-model-server:latest
 
-    - name: Obtener la última URI del modelo desde MLflow
-      # Aquí puedes ejecutar un script similar al anterior para obtener la URI desde MLflow.
-      # Por simplicidad, se asume que la variable de entorno MODEL_URI se define en los secrets.
-      run: echo "Usando MLFLOW_MODEL_URI = ${{ secrets.MLFLOW_MODEL_URI }}"
-      env:
-        MLFLOW_MODEL_URI: ${{ secrets.MLFLOW_MODEL_URI }}
-
-    - name: Actualizar YAML de despliegue
+    - name: Actualizar YAML de despliegue con la URI del modelo
       run: |
-        python update_flask_deployment.py "${{ secrets.MLFLOW_MODEL_URI }}"
+        python update_mlserver_deployment.py "${{ secrets.MLFLOW_MODEL_URI }}"
 
     - name: Configurar kubectl
       uses: azure/setup-kubectl@v3
@@ -58,6 +51,6 @@ jobs:
       run: |
         echo "$KUBECONFIG_CONTENT" > $HOME/.kube/config
 
-    - name: Desplegar la API Flask en Kubernetes
+    - name: Desplegar en Kubernetes
       run: |
-        kubectl apply -f flask_deployment.yaml
+        kubectl apply -f mlflow_deployment.yaml
