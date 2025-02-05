@@ -1,0 +1,37 @@
+# Archivo: flask_deployment_template.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: flask-model-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: flask-model
+  template:
+    metadata:
+      labels:
+        app: flask-model
+    spec:
+      containers:
+      - name: flask-model
+        # Sustituye 'tu_usuario_dockerhub/flask-model:latest' por el nombre de tu imagen en Docker Hub o la imagen que vayas a usar.
+        image: tu_usuario_dockerhub/flask-model:latest
+        ports:
+        - containerPort: 5000
+        env:
+        - name: MLFLOW_MODEL_URI
+          value: "models:/tu_modelo/Production"  # Esta línea se actualizará dinámicamente según el modelo en MLflow.
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: flask-model-service
+spec:
+  selector:
+    app: flask-model
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 5000
+  type: LoadBalancer
