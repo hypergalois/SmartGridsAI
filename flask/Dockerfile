@@ -1,18 +1,16 @@
 # Archivo: Dockerfile
 FROM python:3.9-slim
 
-# Definir el directorio de trabajo en el contenedor
+# Establece el directorio de trabajo
 WORKDIR /app
 
-# Copiar el archivo de dependencias y luego instalarlo
+# Copia el archivo de dependencias e instala MLflow (y lo que necesites)
 COPY requirements.txt /app/requirements.txt
 RUN pip install --upgrade pip && pip install -r requirements.txt
 
-# Copiar el código de la aplicación
-COPY app.py /app/app.py
-
-# Exponer el puerto 5000 (el que usa la app)
+# Expone el puerto 5000 (que usará mlflow models serve)
 EXPOSE 5000
 
-# Ejecutar la aplicación con gunicorn para producción
-CMD ["gunicorn", "--bind", "0.0.0.0:5000", "app:app"]
+# Al iniciar el contenedor, se ejecuta mlflow models serve usando la variable de entorno MLFLOW_MODEL_URI.
+# Se utiliza --no-conda para evitar crear un entorno conda, lo que agiliza el arranque.
+CMD ["sh", "-c", "mlflow models serve -m $MLFLOW_MODEL_URI -p 5000 --no-conda"]
