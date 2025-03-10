@@ -8,11 +8,8 @@ def preprocess_data(context, file_path: str):
     # Cargar el dataset
     df = pd.read_csv(file_path)
 
-    # Convertir fecha y hora a formato datetime
-    df["fecha_hora"] = pd.to_datetime(df["fecha"] + " " + df["hora"])
-
     # Eliminar columnas originales de fecha y hora
-    df.drop(columns=["fecha", "hora"], inplace=True)
+    df['timestamp'] = pd.to_datetime(df['timestamp'])
 
     # Eliminar filas con valores nulos
     df.dropna(inplace=True)
