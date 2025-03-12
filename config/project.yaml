@@ -1,48 +1,48 @@
 metadata:
-  created: '2025-02-16T17:19:19.898000'
+  created: "2025-02-16T17:19:19.898000"
   name: smartgrids
 status:
   state: online
 spec:
-  description: ''
+  description: ""
   source: https://github.com/hypergalois/SmartGridsAI
   desired_state: online
-  goals: ''
-  default_image: ''
+  goals: ""
+  default_image: ""
   functions:
-  - name: preprocess-data
-    spec:
-      kind: job
+    - name: preprocess-data
       spec:
-        entry_points:
-          preprocess_data:
-            name: preprocess_data
-            lineno: 4
-            doc: "Preprocesa el dataset de consumo el\xE9ctrico."
-            has_kwargs: false
-            parameters:
-            - name: context
-            - name: file_path
-              type: str
-            has_varargs: false
-        state_thresholds:
-          pending_scheduled: 1h
-          pending_not_scheduled: '-1'
-          image_pull_backoff: 1h
-          executing: 24h
-        default_handler: preprocess_data
-        image: mlrun/mlrun
-        description: ''
-        build:
-          origin_filename: preprocess.py
-          code_origin: https://github.com/hypergalois/SmartGridsAI#2042ab21d5b6c3eb9b2f9585cea5d400a0a51401:preprocess.py
-          functionSourceCode: aW1wb3J0IG1scnVuCmltcG9ydCBwYW5kYXMgYXMgcGQKCmRlZiBwcmVwcm9jZXNzX2RhdGEoY29udGV4dCwgZmlsZV9wYXRoOiBzdHIpOgogICAgIiIiUHJlcHJvY2VzYSBlbCBkYXRhc2V0IGRlIGNvbnN1bW8gZWzDqWN0cmljby4iIiIKICAgIAogICAgIyBDYXJnYXIgZWwgZGF0YXNldAogICAgZGYgPSBwZC5yZWFkX2NzdihmaWxlX3BhdGgpCgogICAgIyBDb252ZXJ0aXIgbGEgY29sdW1uYSBmZWNoYSBhIGZvcm1hdG8gZGF0ZXRpbWUKICAgIGRmWyJmZWNoYSJdID0gcGQudG9fZGF0ZXRpbWUoZGZbImZlY2hhIl0pCgogICAgIyBFbGltaW5hciBmaWxhcyBjb24gdmFsb3JlcyBudWxvcwogICAgZGYuZHJvcG5hKGlucGxhY2U9VHJ1ZSkKCiAgICAjIEZpbHRyYXIgdmFsb3JlcyBuZWdhdGl2b3MgZW4gY29uc3Vtb19rd2ggeSBjb3N0ZV9ldXJvcwogICAgZGYgPSBkZlsoZGZbImNvbnN1bW9fa3doIl0gPiAwKSAmIChkZlsiY29zdGVfZXVyb3MiXSA+IDApXQoKICAgICMgTG9nZ2VhciBlbCBkYXRhc2V0IHByZXByb2Nlc2FkbyBlbiBNTFJ1bgogICAgY29udGV4dC5sb2dfZGF0YXNldCgiY29uc3Vtb19lbGVjdHJpY29fcHJlcHJvY2VzYWRvIiwgZGY9ZGYsIGZvcm1hdD0iY3N2IikKCiAgICBjb250ZXh0LmxvZ2dlci5pbmZvKGYi4pyFIFByZXByb2Nlc2FtaWVudG8gY29tcGxldGFkby4gRmlsYXMgZmluYWxlczoge2xlbihkZil9IikK
-        command: ''
-        disable_auto_mount: false
-      metadata:
-        name: preprocess-data
-        tag: latest
-      verbose: false
+        kind: job
+        spec:
+          entry_points:
+            preprocess_data:
+              name: preprocess_data
+              lineno: 4
+              doc: "Preprocesa el dataset de consumo el\xE9ctrico."
+              has_kwargs: false
+              parameters:
+                - name: context
+                - name: file_path
+                  type: str
+              has_varargs: false
+          state_thresholds:
+            pending_scheduled: 1h
+            pending_not_scheduled: "-1"
+            image_pull_backoff: 1h
+            executing: 24h
+          default_handler: preprocess_data
+          image: mlrun/mlrun
+          description: ""
+          build:
+            origin_filename: preprocess.py
+            code_origin: https://github.com/hypergalois/SmartGridsAI#2042ab21d5b6c3eb9b2f9585cea5d400a0a51401:preprocess.py
+            functionSourceCode: aW1wb3J0IG1scnVuCmltcG9ydCBwYW5kYXMgYXMgcGQKCmRlZiBwcmVwcm9jZXNzX2RhdGEoY29udGV4dCwgZmlsZV9wYXRoOiBzdHIpOgogICAgIiIiUHJlcHJvY2VzYSBlbCBkYXRhc2V0IGRlIGNvbnN1bW8gZWzDqWN0cmljby4iIiIKICAgIAogICAgIyBDYXJnYXIgZWwgZGF0YXNldAogICAgZGYgPSBwZC5yZWFkX2NzdihmaWxlX3BhdGgpCgogICAgIyBDb252ZXJ0aXIgbGEgY29sdW1uYSBmZWNoYSBhIGZvcm1hdG8gZGF0ZXRpbWUKICAgIGRmWyJmZWNoYSJdID0gcGQudG9fZGF0ZXRpbWUoZGZbImZlY2hhIl0pCgogICAgIyBFbGltaW5hciBmaWxhcyBjb24gdmFsb3JlcyBudWxvcwogICAgZGYuZHJvcG5hKGlucGxhY2U9VHJ1ZSkKCiAgICAjIEZpbHRyYXIgdmFsb3JlcyBuZWdhdGl2b3MgZW4gY29uc3Vtb19rd2ggeSBjb3N0ZV9ldXJvcwogICAgZGYgPSBkZlsoZGZbImNvbnN1bW9fa3doIl0gPiAwKSAmIChkZlsiY29zdGVfZXVyb3MiXSA+IDApXQoKICAgICMgTG9nZ2VhciBlbCBkYXRhc2V0IHByZXByb2Nlc2FkbyBlbiBNTFJ1bgogICAgY29udGV4dC5sb2dfZGF0YXNldCgiY29uc3Vtb19lbGVjdHJpY29fcHJlcHJvY2VzYWRvIiwgZGY9ZGYsIGZvcm1hdD0iY3N2IikKCiAgICBjb250ZXh0LmxvZ2dlci5pbmZvKGYi4pyFIFByZXByb2Nlc2FtaWVudG8gY29tcGxldGFkby4gRmlsYXMgZmluYWxlczoge2xlbihkZil9IikK
+          command: ""
+          disable_auto_mount: false
+        metadata:
+          name: preprocess-data
+          tag: latest
+        verbose: false
   artifact_path: s3://mlrun
   load_source_on_run: true
 kind: project
