@@ -1,25 +1,35 @@
 import mlrun
 import pandas as pd
 import joblib
-from sklearn.metrics import mean_squared_error
+from sklearn.metrics import mean_squared_error, mean_absolute_error
 
 def evaluate(context, model_path: str, test_file: str):
-    """Evalúa el modelo Prophet."""
+    """
+    Evalúa cualquier modelo sklearn/prophet/arima
+    """
 
-    # Cargar el modelo
+    # Cargar modelo
     model = joblib.load(model_path)
 
-    # Cargar datos de test
+    # Cargar test
     df_test = pd.read_parquet(test_file)
-    df_test = df_test.rename(columns={"fecha_hora": "ds", "consumo_kwh": "y"})
+    df_test = df_test.groupby(df_test['fecha_hora'].dt.date).agg({'consumo_kwh': 'mean'}).reset_index()
+    df_test.columns = ['ds', 'y']
+    df_test['ds'] = pd.to_datetime(df_test['ds'])
 
-    # Predecir
-    future = df_test[['ds']]
-    forecast = model.predict(future)
+    # Prophet / ARIMA / sklearn predicciones
+    try:
+        if hasattr(model, 'predict'):
+            forecast = model.predict(df_test['ds'])
+        else:
+            forecast = model.predict(n_periods=len(df_test))
+    except Exception as e:
+        raise ValueError(f"Error al predecir: {str(e)}")
 
-    # Métricas
-    mse = mean_squared_error(df_test['y'], forecast['yhat'])
+    mse = mean_squared_error(df_test['y'], forecast)
+    mae = mean_absolute_error(df_test['y'], forecast)
 
-    # Loggear las métricas
     context.log_result("mse", mse)
-    print(f"✅ Evaluación completa. MSE: {mse}")
+    context.log_result("mae", mae)
+
+    print(f"✅ Evaluación completa. MSE: {mse}, MAE: {mae}")
