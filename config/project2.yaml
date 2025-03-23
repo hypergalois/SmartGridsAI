@@ -1,0 +1,28 @@
+metadata:
+  name: smartgrids
+spec:
+  description: "Proyecto de predicción de consumo eléctrico"
+  source: https://github.com/hypergalois/SmartGridsAI
+  artifact_path: s3://mlrun/artifacts # o local
+  default_image: mlrun/mlrun # O tu imagen docker
+  functions:
+    - name: preprocess-data
+      kind: job
+      handler: preprocess_data
+      filename: functions/preprocess-data/preprocess.py
+      image: mlrun/mlrun
+    - name: train-model
+      kind: job
+      handler: train
+      filename: functions/train-model/train.py
+      image: mlrun/mlrun
+    - name: evaluate-model
+      kind: job
+      handler: evaluate
+      filename: functions/evaluate-model/evaluate.py
+      image: mlrun/mlrun
+    - name: predict
+      kind: serving
+      class_name: Predictor
+      filename: functions/predict/predict.py
+      image: mlrun/mlrun
