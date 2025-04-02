@@ -7,42 +7,67 @@ import pandas as pd
 from collections import deque
 from tqdm import trange
 
-# ==============================================
-# 1) GENERAR DATOS SINTÉTICOS PARA 100 CASAS
-# ==============================================
-num_casas = 100
-horas_por_casa = 24  # Un día de ejemplo
-n_rows = num_casas * horas_por_casa
+# Comprobacion gpu
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-df = pd.read_csv('dataset_d3_filtrado.csv')  # Cargar datos reales
+# --- Nuevo: importar wandb ---
+import wandb
 
-# Ordenamos por id_casa y datetime para no mezclar
+# ==============================================
+# 1) CARGAR TUS DATASETS REALES
+# ==============================================
+dataset_consumo = pd.read_csv('datasets/dataset_consumo.csv')       # Ajusta la ruta
+dataset_produccion = pd.read_csv('datasets/dataset_produccion.csv') # Ajusta la ruta
+
+# Suponemos que cada uno tiene columnas 'datetime', 'id_casa', y:
+# - dataset_consumo => 'consumo_kWh'
+# - dataset_produccion => 'produccion_kWh'
+# Otras columnas también son bienvenidas, por ejemplo 'temperatura', etc.
+
+# 1.1) Merge de ambos en un solo DataFrame (clave: 'datetime' + 'id_casa')
+df = pd.merge(dataset_consumo, dataset_produccion, on=['datetime','id_casa'], how='inner')
+
+# Si NO tienes la columna 'precio_electricidad', generamos una sintética (ej. entre 50 y 150)
+if 'precio_electricidad' not in df.columns:
+    np.random.seed(42)
+    df['precio_electricidad'] = np.random.uniform(50, 150, size=len(df))
+
+# Ordenamos para evitar desorden temporal
 df.sort_values(['id_casa', 'datetime'], inplace=True, ignore_index=True)
 
-# Podemos normalizar o escalar estas variables si hace falta
-# (Aquí simplemente las dejamos así para el ejemplo)
+# ==============================================
+# 2) FILTRAR A UNA SOLA CASA (id_casa = 3234)
+# ==============================================
+casa_id_objetivo = 3234
+df_casa = df[df['id_casa'] == casa_id_objetivo].copy()
+df_casa.sort_values('datetime', inplace=True, ignore_index=True)
 
-# Definimos qué columnas componen nuestro "estado"
-state_columns = ['consumo_kWh', 'produccion_kWh', 'precio_electricidad']
+# ==============================================
+# 3) DEFINIR COLUMNAS DEL ESTADO
+# ==============================================
+# Suponiendo que tu DataFrame final tiene estas columnas
+# (cambia 'coste_euros' por 'precio_electricidad' si corresponde)
+state_columns = ['consumo_kWh', 'produccion_kWh', 'coste_euros']
+# Si no existe 'coste_euros' y deseas usar el precio:
+# state_columns = ['consumo_kWh', 'produccion_kWh', 'precio_electricidad']
 
-# El tamaño de estado es el número de columnas elegidas
 STATE_SIZE = len(state_columns)
 
 # ==============================================
-# 2) DEFINIR PARÁMETROS DE RL
+# 4) HIPERPARÁMETROS RL
 # ==============================================
-ACTION_SIZE = 3  # 0: Mantener, 1: Comprar, 2: Vender
+ACTION_SIZE = 3   # 0: Mantener, 1: Comprar, 2: Vender
 GAMMA = 0.99
 LR = 0.001
 BATCH_SIZE = 32
 MEMORY_SIZE = 2000
-NUM_EPISODES = 50  # Ejemplo de episodios
+NUM_EPISODES = 50
 EPSILON_START = 1.0
 EPSILON_MIN = 0.1
 EPSILON_DECAY = 0.95
 
 # ==============================================
-# 3) DEFINIR DQN (RED NEURONAL)
+# 5) RED NEURONAL (DQN)
 # ==============================================
 class DQN(nn.Module):
     def __init__(self, state_size, action_size):
@@ -57,7 +82,7 @@ class DQN(nn.Module):
         return self.fc3(x)
 
 # ==============================================
-# 4) DEFINIR AGENTE DQN
+# 6) AGENTE DQN
 # ==============================================
 class DQNAgent:
     def __init__(self, state_size, action_size):
@@ -71,7 +96,7 @@ class DQNAgent:
 
         self.device = torch.device('cpu')  # Forzamos CPU
         self.model.to(self.device)
-
+    
     def act(self, state, epsilon=0.1):
         # Política epsilon-greedy
         if np.random.rand() <= epsilon:
@@ -80,15 +105,17 @@ class DQNAgent:
         q_values = self.model(state_t)
         action = torch.argmax(q_values).item()
         return action
-
+    
     def remember(self, state, action, reward, next_state, done):
         self.memory.append((state, action, reward, next_state, done))
-
+    
     def replay(self):
-        # Si no hay batch suficiente, no entrenamos
+        """
+        Retorna el 'loss' promedio de este batch para poder loguearlo en wandb.
+        """
         if len(self.memory) < BATCH_SIZE:
-            return
-
+            return None
+        
         batch = random.sample(self.memory, BATCH_SIZE)
         states, actions, rewards, next_states, dones = zip(*batch)
 
@@ -98,10 +125,10 @@ class DQNAgent:
         next_states = torch.FloatTensor(next_states).to(self.device)
         dones = torch.BoolTensor(dones).to(self.device)
 
-        # Q(s,a)
+        # Q(s,a) actual
         current_Q = self.model(states).gather(1, actions).squeeze()
 
-        # max_a' Q(s',a')
+        # Q(s', a') futuro
         next_Q = self.model(next_states).max(1)[0]
         target_Q = rewards + GAMMA * next_Q * (~dones)
 
@@ -111,98 +138,106 @@ class DQNAgent:
         loss.backward()
         self.optimizer.step()
 
+        return loss.item()
+
 # ==============================================
-# 5) FUNCIÓN DE RECOMPENSA (EJEMPLO SIMPLIFICADO)
+# 7) FUNCIÓN DE RECOMPENSA (EJEMPLO SIMPLE)
 # ==============================================
 def calcular_recompensa(row, action):
     """
-    row: Fila actual con consumo, produccion, precio, etc.
+    row: Fila del DataFrame con [consumo_kWh, produccion_kWh, precio_electricidad] o lo que uses.
     action: 0=Mantener, 1=Comprar, 2=Vender
-
-    - Compramos cuando el precio es bajo => reward + (inversamente al precio)
-    - Vendemos cuando el precio es alto => reward + (precio)
-    - Mantener => reward pequeño basado en equilibrio
     """
-    precio = row['precio_electricidad']
+    # Ajusta esto a tus columnas reales
+    if 'precio_electricidad' in row:
+        precio = row['precio_electricidad']
+    else:
+        # Si usas 'coste_euros' o algo similar
+        precio = row.get('coste_euros', 100.0)  # Valor por defecto
     consumo = row['consumo_kWh']
     produccion = row['produccion_kWh']
 
-    # EJEMPLO: la cantidad neta es produccion - consumo
-    #  si >0 hay excedente, si <0 hay déficit
-    neto = produccion - consumo
+    neto = produccion - consumo  # >0 excedente, <0 déficit
 
-    # Caso 0: Mantener
-    if action == 0:
-        # premio por estar equilibrado
+    if action == 0:  # Mantener
         reward = -abs(neto) * 0.1
-    # Caso 1: Comprar
-    elif action == 1:
-        # penalización si neto ya era positivo
+    elif action == 1:  # Comprar
         if neto > 0:
             reward = -1.0
         else:
-            # hipotético: si precio es bajo, sumamos inverso
-            reward = 50 / precio  # más alto si precio es bajo
-    # Caso 2: Vender
-    else:
-        # penalización si neto era negativo
+            reward = 50 / precio  # Cuanto más bajo el precio, mejor
+    else:  # Vender
         if neto < 0:
             reward = -1.0
         else:
-            # beneficio si precio es alto
-            reward = precio / 50.0
-
+            reward = precio / 50.0  # Cuanto más alto el precio, mejor
     return reward
 
 # ==============================================
-# 6) BUCLE PRINCIPAL DE ENTRENAMIENTO
+# 8) INICIALIZAR W&B (PROJECT="SmartGrids")
+# ==============================================
+wandb.init(
+    project="SmartGrids", 
+    name="DQN-CompraVenta-CasaUnica",
+    config={
+        "episodes": NUM_EPISODES,
+        "lr": LR,
+        "batch_size": BATCH_SIZE,
+        "gamma": GAMMA
+    }
+)
+config = wandb.config
+
+# ==============================================
+# 9) BUCLE DE ENTRENAMIENTO (SÓLO CASA 3234)
 # ==============================================
 agent = DQNAgent(STATE_SIZE, ACTION_SIZE)
 
 epsilon = EPSILON_START
 
+# Filtramos y usamos sólo df_casa (que ya tiene id=3234)
+# Asegúrate de que df_casa tenga suficientes filas
+print(f"Entrenando solo para la casa {casa_id_objetivo}, con {len(df_casa)} registros.")
+
 for episode in trange(NUM_EPISODES, desc="Entrenando"):
     total_reward = 0.0
+    # Recorremos cada fila de la casa como "steps"
+    for i in range(len(df_casa) - 1):
+        current_row = df_casa.iloc[i]
+        state = current_row[state_columns].values.astype(np.float32)
 
-    # Mezclamos el orden de las casas en cada episodio
-    casas = df['id_casa'].unique()
-    np.random.shuffle(casas)
+        action = agent.act(state, epsilon)
+        reward = calcular_recompensa(current_row, action)
+        total_reward += reward
 
-    for casa_id in casas:
-        # Filtramos datos de la casa y ordenamos por tiempo
-        df_casa = df[df['id_casa'] == casa_id].sort_values('datetime')
-        df_casa = df_casa.reset_index(drop=True)
+        next_row = df_casa.iloc[i+1]
+        next_state = next_row[state_columns].values.astype(np.float32)
 
-        # Recorremos las filas de la casa
-        for i in range(len(df_casa) - 1):
-            # Estado actual
-            current_row = df_casa.iloc[i]
-            state = current_row[state_columns].values.astype(np.float32)
+        done = (i == len(df_casa) - 2)
 
-            # Acción del agente (política epsilon-greedy)
-            action = agent.act(state, epsilon)
+        agent.remember(state, action, reward, next_state, done)
 
-            # Calculamos la recompensa en base a la acción
-            reward = calcular_recompensa(current_row, action)
-            total_reward += reward
+        # (Opcional) Replay a cada step. 
+        # Si quieres esperar al final de la "época" puedes moverlo fuera
+        loss_val = agent.replay()
 
-            # Estado siguiente
-            next_row = df_casa.iloc[i+1]
-            next_state = next_row[state_columns].values.astype(np.float32)
-
-            # Chequeo si estamos en el último step de la casa
-            done = (i == len(df_casa) - 2)
-
-            # Guardamos en memoria
-            agent.remember(state, action, reward, next_state, done)
-
-        # Realizamos replay (aprendizaje) después de cada casa
-        agent.replay()
-
-    # Reducimos epsilon
+    # Reducimos epsilon para disminuir exploración
     epsilon = max(EPSILON_MIN, epsilon * EPSILON_DECAY)
 
+    # Registramos métricas en Weights & Biases
+    wandb.log({
+        "episode": episode + 1,
+        "total_reward": total_reward,
+        "epsilon": epsilon,
+        "loss": loss_val if loss_val is not None else 0.0
+    })
+
+    # Impresión periódica
     if (episode+1) % 5 == 0:
         print(f"[Episodio {episode+1}] Recompensa total: {total_reward:.2f}, Epsilon: {epsilon:.2f}")
 
 print("Entrenamiento finalizado.")
+wandb.finish()
+
+# Guardar el modelo 
+torch.save(agent.model.state_dict(), "dqn_model.pth")
