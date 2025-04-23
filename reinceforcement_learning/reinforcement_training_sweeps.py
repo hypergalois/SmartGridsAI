@@ -13,6 +13,8 @@ from tqdm import trange
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 print(f"Usando dispositivo: {device}")
 
+EPSILON_DECAY = 0.99  # Decaimiento de epsilon
+
 import wandb
 # ==============================================
 # SWEEP CONFIG INTEGRADO EN EL SCRIPT
@@ -25,7 +27,7 @@ sweep_config = {
     },
     'parameters': {
         'gamma': {
-            'min': 0.85,
+            'min': 0.5,
             'max': 0.999
         },
         'lr': {
@@ -39,12 +41,11 @@ sweep_config = {
         'hidden_size': {
             'values': [64, 128, 256]
         },
-        'epsilon_decay': {
-            'min': 0.90,
-            'max': 0.99
-        },
         'memory_size': {
             'value': 10000
+        },
+        'num_layers': {
+            'values': [1, 2, 3, 4, 5]
         }
     },
     'early_terminate': {
@@ -52,6 +53,7 @@ sweep_config = {
         'min_iter': 10
     }
 }
+
 
 def sweep_train():
     wandb.init(project="SmartGrids", name="DQN-Sweep")
@@ -70,35 +72,58 @@ def sweep_train():
     state_columns = ['consumo_kWh', 'produccion_kWh', 'coste_euros']
     STATE_SIZE = len(state_columns)
     ACTION_SIZE = 3
-    NUM_EPISODES = 30
+    NUM_EPISODES = 20
     EPSILON_START = 1.0
     EPSILON_MIN = 0.1
 
     class DQN(nn.Module):
-        def __init__(self, state_size, action_size, hidden_size):
+        def __init__(self, state_size, action_size, hidden_size, num_layers):
             super().__init__()
-            self.fc1 = nn.Linear(state_size, hidden_size)
-            self.fc2 = nn.Linear(hidden_size, hidden_size)
-            self.fc3 = nn.Linear(hidden_size, action_size)
-            self.act = nn.LeakyReLU(negative_slope=0.01)
+            layers = []
+
+            # Capa de entrada
+            layers.append(nn.Linear(state_size, hidden_size))
+            layers.append(nn.LeakyReLU(0.01))
+
+            # Capas ocultas intermedias
+            for _ in range(num_layers - 1):
+                layers.append(nn.Linear(hidden_size, hidden_size))
+                layers.append(nn.LeakyReLU(0.01))
+
+            # Capa de salida
+            layers.append(nn.Linear(hidden_size, action_size))
+
+            self.network = nn.Sequential(*layers)
 
         def forward(self, x):
-            x = self.act(self.fc1(x))
-            x = self.act(self.fc2(x))
-            return self.fc3(x)
+            return self.network(x)
+
 
     class DQNAgent:
         def __init__(self, state_size, action_size):
+            self.state_size = state_size
+            self.action_size = action_size
             self.memory = deque(maxlen=config.memory_size)
-            self.model = DQN(state_size, action_size, config.hidden_size)
+
+            self.model = DQN(state_size, action_size, config.hidden_size, config.num_layers)
+            self.target_model = DQN(state_size, action_size, config.hidden_size, config.num_layers)
+
             self.optimizer = optim.Adam(self.model.parameters(), lr=config.lr)
             self.loss_fn = nn.MSELoss()
             self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
             self.model.to(self.device)
+            self.target_model.to(self.device)
+            self.update_target_network()  # inicializar target con los mismos pesos
+
+            self.update_counter = 0  # para saber cuándo sincronizar
+
+        def update_target_network(self):
+            self.target_model.load_state_dict(self.model.state_dict())
 
         def act(self, state, epsilon):
             if np.random.rand() <= epsilon:
-                return random.randrange(ACTION_SIZE)
+                return random.randrange(self.action_size)
             state_t = torch.FloatTensor(state).unsqueeze(0).to(self.device)
             q_values = self.model(state_t)
             return torch.argmax(q_values).item()
@@ -111,20 +136,33 @@ def sweep_train():
                 return None
             batch = random.sample(self.memory, config.batch_size)
             states, actions, rewards, next_states, dones = zip(*batch)
+
             states = torch.FloatTensor(np.array(states)).to(self.device)
             actions = torch.LongTensor(np.array(actions)).unsqueeze(1).to(self.device)
             rewards = torch.FloatTensor(np.array(rewards)).to(self.device)
             next_states = torch.FloatTensor(np.array(next_states)).to(self.device)
             dones = torch.BoolTensor(np.array(dones)).to(self.device)
 
+            # --- PREDICCIONES ---
             current_Q = self.model(states).gather(1, actions).squeeze()
-            next_Q = self.model(next_states).max(1)[0]
+
+            # --- TARGET con red target_model ---
+            next_Q = self.target_model(next_states).max(1)[0]
             target_Q = rewards + config.gamma * next_Q * (~dones)
+
+            # --- ENTRENAMIENTO ---
             loss = self.loss_fn(current_Q, target_Q.detach())
             self.optimizer.zero_grad()
             loss.backward()
             self.optimizer.step()
+
+            # --- ACTUALIZACIÓN DE LA RED TARGET cada N updates ---
+            self.update_counter += 1
+            if self.update_counter % 50 == 0:
+                self.update_target_network()
+
             return loss.item()
+
 
     def calcular_recompensa(row, action):
         precio = row['coste_euros']
@@ -157,7 +195,7 @@ def sweep_train():
             if loss:
                 wandb.log({"loss": loss})
 
-        epsilon = max(EPSILON_MIN, epsilon * config.epsilon_decay)
+        epsilon = max(EPSILON_MIN, epsilon * EPSILON_DECAY)
         wandb.log({
             "episode": episode + 1,
             "total_reward": total_reward,

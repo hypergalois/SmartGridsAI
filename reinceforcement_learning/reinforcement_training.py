@@ -9,6 +9,7 @@ from tqdm import trange
 
 # Comprobacion gpu
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+print(f"Usando dispositivo: {device}")
 
 # --- Nuevo: importar wandb ---
 import wandb
@@ -27,11 +28,6 @@ dataset_produccion = pd.read_csv('datasets/dataset_produccion.csv') # Ajusta la 
 # 1.1) Merge de ambos en un solo DataFrame (clave: 'datetime' + 'id_casa')
 df = pd.merge(dataset_consumo, dataset_produccion, on=['datetime','id_casa'], how='inner')
 
-# Si NO tienes la columna 'precio_electricidad', generamos una sintética (ej. entre 50 y 150)
-if 'precio_electricidad' not in df.columns:
-    np.random.seed(42)
-    df['precio_electricidad'] = np.random.uniform(50, 150, size=len(df))
-
 # Ordenamos para evitar desorden temporal
 df.sort_values(['id_casa', 'datetime'], inplace=True, ignore_index=True)
 
@@ -48,8 +44,6 @@ df_casa.sort_values('datetime', inplace=True, ignore_index=True)
 # Suponiendo que tu DataFrame final tiene estas columnas
 # (cambia 'coste_euros' por 'precio_electricidad' si corresponde)
 state_columns = ['consumo_kWh', 'produccion_kWh', 'coste_euros']
-# Si no existe 'coste_euros' y deseas usar el precio:
-# state_columns = ['consumo_kWh', 'produccion_kWh', 'precio_electricidad']
 
 STATE_SIZE = len(state_columns)
 
@@ -64,7 +58,48 @@ MEMORY_SIZE = 2000
 NUM_EPISODES = 50
 EPSILON_START = 1.0
 EPSILON_MIN = 0.1
-EPSILON_DECAY = 0.95
+EPSILON_DECAY = 0.99
+
+
+# ==============================================
+# SWEEP CONFIG INTEGRADO EN EL SCRIPT
+# ==============================================
+sweep_config = {
+    'method': 'bayes',
+    'metric': {
+        'name': 'total_reward',
+        'goal': 'maximize'
+    },
+    'parameters': {
+        'gamma': {
+            'min': 0.85,
+            'max': 0.999
+        },
+        'lr': {
+            'distribution': 'log_uniform_values',
+            'min': 1e-5,
+            'max': 1e-3
+        },
+        'batch_size': {
+            'values': [32, 64, 128]
+        },
+        'hidden_size': {
+            'values': [64, 128, 256]
+        },
+        'epsilon_decay': {
+            'min': 0.90,
+            'max': 0.99
+        },
+        'memory_size': {
+            'value': 10000
+        }
+    },
+    'early_terminate': {
+        'type': 'hyperband',
+        'min_iter': 10
+    }
+}
+
 
 # ==============================================
 # 5) RED NEURONAL (DQN)
@@ -119,11 +154,11 @@ class DQNAgent:
         batch = random.sample(self.memory, BATCH_SIZE)
         states, actions, rewards, next_states, dones = zip(*batch)
 
-        states = torch.FloatTensor(states).to(self.device)
-        actions = torch.LongTensor(actions).unsqueeze(1).to(self.device)
-        rewards = torch.FloatTensor(rewards).to(self.device)
-        next_states = torch.FloatTensor(next_states).to(self.device)
-        dones = torch.BoolTensor(dones).to(self.device)
+        states = torch.FloatTensor(np.array(states)).to(self.device)
+        actions = torch.LongTensor(np.array(actions)).unsqueeze(1).to(self.device)
+        rewards = torch.FloatTensor(np.array(rewards)).to(self.device)
+        next_states = torch.FloatTensor(np.array(next_states)).to(self.device)
+        dones = torch.BoolTensor(np.array(dones)).to(self.device)
 
         # Q(s,a) actual
         current_Q = self.model(states).gather(1, actions).squeeze()
@@ -148,12 +183,7 @@ def calcular_recompensa(row, action):
     row: Fila del DataFrame con [consumo_kWh, produccion_kWh, precio_electricidad] o lo que uses.
     action: 0=Mantener, 1=Comprar, 2=Vender
     """
-    # Ajusta esto a tus columnas reales
-    if 'precio_electricidad' in row:
-        precio = row['precio_electricidad']
-    else:
-        # Si usas 'coste_euros' o algo similar
-        precio = row.get('coste_euros', 100.0)  # Valor por defecto
+    precio = row['coste_euros']
     consumo = row['consumo_kWh']
     produccion = row['produccion_kWh']
 
@@ -202,6 +232,7 @@ print(f"Entrenando solo para la casa {casa_id_objetivo}, con {len(df_casa)} regi
 for episode in trange(NUM_EPISODES, desc="Entrenando"):
     total_reward = 0.0
     # Recorremos cada fila de la casa como "steps"
+    print(f"Entrenando episodio {episode+1}...")
     for i in range(len(df_casa) - 1):
         current_row = df_casa.iloc[i]
         state = current_row[state_columns].values.astype(np.float32)
@@ -220,6 +251,12 @@ for episode in trange(NUM_EPISODES, desc="Entrenando"):
         # (Opcional) Replay a cada step. 
         # Si quieres esperar al final de la "época" puedes moverlo fuera
         loss_val = agent.replay()
+
+        wandb.log({
+            "step_reward": reward,
+            "epsilon": epsilon,
+            "loss": loss_val if loss_val is not None else 0.0
+        })
 
     # Reducimos epsilon para disminuir exploración
     epsilon = max(EPSILON_MIN, epsilon * EPSILON_DECAY)
