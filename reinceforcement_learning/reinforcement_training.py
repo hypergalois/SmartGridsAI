@@ -7,12 +7,12 @@ import pandas as pd
 from collections import deque
 from tqdm import trange
 
-# Comprobacion gpu
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-print(f"Usando dispositivo: {device}")
-
 # --- Nuevo: importar wandb ---
 import wandb
+
+print("Nombre de la GPU:", torch.cuda.get_device_name(0))
+print("Número de GPUs disponibles:", torch.cuda.device_count())
+print("Dispositivo actual:", torch.cuda.current_device())
 
 # ==============================================
 # 1) CARGAR TUS DATASETS REALES
@@ -43,7 +43,7 @@ df_casa.sort_values('datetime', inplace=True, ignore_index=True)
 # ==============================================
 # Suponiendo que tu DataFrame final tiene estas columnas
 # (cambia 'coste_euros' por 'precio_electricidad' si corresponde)
-state_columns = ['consumo_kWh', 'produccion_kWh', 'coste_euros']
+state_columns = ['consumo_kWh', 'produccion_kWh', 'coste_euros', 'irradiancia_W_m2', 'num_placas', 'humedad']
 
 STATE_SIZE = len(state_columns)
 
@@ -91,7 +91,7 @@ sweep_config = {
             'max': 0.99
         },
         'memory_size': {
-            'value': 10000
+            'value': 1000
         }
     },
     'early_terminate': {
@@ -100,123 +100,127 @@ sweep_config = {
     }
 }
 
+wandb.init(
+    project="SmartGrids", 
+    name="DQN-CompraVenta-CasaUnica",
+    config={
+        "gamma": GAMMA,
+        "lr": LR,
+        "batch_size": BATCH_SIZE,
+        "hidden_size": 128,
+        "num_layers": 2,
+        "memory_size": MEMORY_SIZE,
+        "epsilon_decay": EPSILON_DECAY
+    }
+)
+config = wandb.config
+
 
 # ==============================================
 # 5) RED NEURONAL (DQN)
 # ==============================================
 class DQN(nn.Module):
-    def __init__(self, state_size, action_size):
-        super(DQN, self).__init__()
-        self.fc1 = nn.Linear(state_size, 64)
-        self.fc2 = nn.Linear(64, 64)
-        self.fc3 = nn.Linear(64, action_size)
+    def __init__(self, state_size, action_size, hidden_size, num_layers):
+        super().__init__()
+        layers = [nn.Linear(state_size, hidden_size), nn.LeakyReLU(0.01)]
+        for _ in range(num_layers - 1):
+            layers.append(nn.Linear(hidden_size, hidden_size))
+            layers.append(nn.LeakyReLU(0.01))
+        layers.append(nn.Linear(hidden_size, action_size))
+        self.network = nn.Sequential(*layers)
 
     def forward(self, x):
-        x = torch.relu(self.fc1(x))
-        x = torch.relu(self.fc2(x))
-        return self.fc3(x)
+        return self.network(x)
+
 
 # ==============================================
 # 6) AGENTE DQN
 # ==============================================
 class DQNAgent:
     def __init__(self, state_size, action_size):
-        self.state_size = state_size
-        self.action_size = action_size
-        self.memory = deque(maxlen=MEMORY_SIZE)
-
-        self.model = DQN(state_size, action_size)
-        self.optimizer = optim.Adam(self.model.parameters(), lr=LR)
+        self.memory = deque(maxlen=config.memory_size)
+        self.model = DQN(state_size, action_size, config.hidden_size, config.num_layers)
+        self.target_model = DQN(state_size, action_size, config.hidden_size, config.num_layers)
+        self.optimizer = optim.Adam(self.model.parameters(), lr=config.lr)
         self.loss_fn = nn.MSELoss()
-
-        self.device = torch.device('cpu')  # Forzamos CPU
+        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.model.to(self.device)
-    
-    def act(self, state, epsilon=0.1):
-        # Política epsilon-greedy
+        self.target_model.to(self.device)
+        self.update_target_network()
+        self.update_counter = 0
+
+    def update_target_network(self):
+        self.target_model.load_state_dict(self.model.state_dict())
+
+    def act(self, state, epsilon):
         if np.random.rand() <= epsilon:
-            return random.randrange(self.action_size)
+            return random.randrange(ACTION_SIZE)
         state_t = torch.FloatTensor(state).unsqueeze(0).to(self.device)
         q_values = self.model(state_t)
-        action = torch.argmax(q_values).item()
-        return action
-    
-    def remember(self, state, action, reward, next_state, done):
-        self.memory.append((state, action, reward, next_state, done))
-    
-    def replay(self):
-        """
-        Retorna el 'loss' promedio de este batch para poder loguearlo en wandb.
-        """
-        if len(self.memory) < BATCH_SIZE:
-            return None
-        
-        batch = random.sample(self.memory, BATCH_SIZE)
-        states, actions, rewards, next_states, dones = zip(*batch)
+        return torch.argmax(q_values).item()
 
+    def remember(self, s, a, r, s2, done):
+        self.memory.append((s, a, r, s2, done))
+
+    def replay(self):
+        if len(self.memory) < config.batch_size:
+            return None
+        batch = random.sample(self.memory, config.batch_size)
+        states, actions, rewards, next_states, dones = zip(*batch)
         states = torch.FloatTensor(np.array(states)).to(self.device)
         actions = torch.LongTensor(np.array(actions)).unsqueeze(1).to(self.device)
         rewards = torch.FloatTensor(np.array(rewards)).to(self.device)
         next_states = torch.FloatTensor(np.array(next_states)).to(self.device)
         dones = torch.BoolTensor(np.array(dones)).to(self.device)
-
-        # Q(s,a) actual
         current_Q = self.model(states).gather(1, actions).squeeze()
-
-        # Q(s', a') futuro
-        next_Q = self.model(next_states).max(1)[0]
-        target_Q = rewards + GAMMA * next_Q * (~dones)
-
+        next_Q = self.target_model(next_states).max(1)[0]
+        target_Q = rewards + config.gamma * next_Q * (~dones)
         loss = self.loss_fn(current_Q, target_Q.detach())
-
         self.optimizer.zero_grad()
         loss.backward()
         self.optimizer.step()
-
+        self.update_counter += 1
+        if self.update_counter % 50 == 0:
+            self.update_target_network()
         return loss.item()
-
 # ==============================================
 # 7) FUNCIÓN DE RECOMPENSA (EJEMPLO SIMPLE)
 # ==============================================
-def calcular_recompensa(row, action):
-    """
-    row: Fila del DataFrame con [consumo_kWh, produccion_kWh, precio_electricidad] o lo que uses.
-    action: 0=Mantener, 1=Comprar, 2=Vender
-    """
+def calcular_recompensa(row, action, battery_soc):
     precio = row['coste_euros']
     consumo = row['consumo_kWh']
     produccion = row['produccion_kWh']
+    neto = produccion - consumo
+    capacidad = 13.5
+    max_potencia = 5.0
+    eficiencia = 0.95
+    reward = 0
+    beneficio = 0
 
-    neto = produccion - consumo  # >0 excedente, <0 déficit
+    if action == 0:  # mantener
+        reward = -abs(neto) * 0.05
 
-    if action == 0:  # Mantener
-        reward = -abs(neto) * 0.1
-    elif action == 1:  # Comprar
-        if neto > 0:
-            reward = -1.0
+    elif action == 1:  # comprar
+        energia_a_comprar = min(max_potencia, capacidad - battery_soc)
+        if energia_a_comprar > 0:
+            battery_soc += energia_a_comprar * eficiencia
+            costo = energia_a_comprar * precio
+            reward = -costo
+            beneficio = -costo
         else:
-            reward = 50 / precio  # Cuanto más bajo el precio, mejor
-    else:  # Vender
-        if neto < 0:
-            reward = -1.0
-        else:
-            reward = precio / 50.0  # Cuanto más alto el precio, mejor
-    return reward
+            reward = -5
 
-# ==============================================
-# 8) INICIALIZAR W&B (PROJECT="SmartGrids")
-# ==============================================
-wandb.init(
-    project="SmartGrids", 
-    name="DQN-CompraVenta-CasaUnica",
-    config={
-        "episodes": NUM_EPISODES,
-        "lr": LR,
-        "batch_size": BATCH_SIZE,
-        "gamma": GAMMA
-    }
-)
-config = wandb.config
+    elif action == 2:  # vender
+        energia_a_vender = min(max_potencia, battery_soc)
+        if energia_a_vender > 0:
+            battery_soc -= energia_a_vender / eficiencia
+            ingreso = energia_a_vender * precio
+            reward = ingreso
+            beneficio = ingreso
+        else:
+            reward = -5
+
+    return reward, battery_soc, beneficio
 
 # ==============================================
 # 9) BUCLE DE ENTRENAMIENTO (SÓLO CASA 3234)
@@ -228,45 +232,44 @@ epsilon = EPSILON_START
 # Filtramos y usamos sólo df_casa (que ya tiene id=3234)
 # Asegúrate de que df_casa tenga suficientes filas
 print(f"Entrenando solo para la casa {casa_id_objetivo}, con {len(df_casa)} registros.")
+print("Nombre de la GPU:", torch.cuda.get_device_name(0))
+print("Número de GPUs disponibles:", torch.cuda.device_count())
+print("Dispositivo actual:", torch.cuda.current_device())
 
 for episode in trange(NUM_EPISODES, desc="Entrenando"):
     total_reward = 0.0
-    # Recorremos cada fila de la casa como "steps"
-    print(f"Entrenando episodio {episode+1}...")
+    beneficio_total = 0.0
+    battery_soc = 6.75  # 50% cargada
+
     for i in range(len(df_casa) - 1):
         current_row = df_casa.iloc[i]
-        state = current_row[state_columns].values.astype(np.float32)
+        next_row = df_casa.iloc[i + 1]
+
+        state_base = current_row[state_columns].values.astype(np.float32)
+        next_state_base = next_row[state_columns].values.astype(np.float32)
+
+        # Normalizar battery_soc (0–1)
+        state = np.append(state_base, battery_soc / 13.5)
+        next_state = np.append(next_state_base, battery_soc / 13.5)
 
         action = agent.act(state, epsilon)
-        reward = calcular_recompensa(current_row, action)
-        total_reward += reward
-
-        next_row = df_casa.iloc[i+1]
-        next_state = next_row[state_columns].values.astype(np.float32)
-
+        reward, battery_soc, beneficio = calcular_recompensa(current_row, action, battery_soc)
         done = (i == len(df_casa) - 2)
 
         agent.remember(state, action, reward, next_state, done)
+        total_reward += reward
+        beneficio_total += beneficio
 
-        # (Opcional) Replay a cada step. 
-        # Si quieres esperar al final de la "época" puedes moverlo fuera
-        loss_val = agent.replay()
+        loss = agent.replay()
+        if loss:
+            wandb.log({"loss": loss})
 
-        wandb.log({
-            "step_reward": reward,
-            "epsilon": epsilon,
-            "loss": loss_val if loss_val is not None else 0.0
-        })
-
-    # Reducimos epsilon para disminuir exploración
     epsilon = max(EPSILON_MIN, epsilon * EPSILON_DECAY)
-
-    # Registramos métricas en Weights & Biases
     wandb.log({
         "episode": episode + 1,
         "total_reward": total_reward,
-        "epsilon": epsilon,
-        "loss": loss_val if loss_val is not None else 0.0
+        "beneficio_euros": beneficio_total,
+        "epsilon": epsilon
     })
 
     # Impresión periódica
