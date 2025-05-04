@@ -32,7 +32,7 @@ sweep_config = {
 }
 
 def sweep_train():
-    wandb.init(project="SmartGrids", name="DQN-Sweep")
+    wandb.init(project="SmartGrids")
     config = wandb.config
 
     # ================== Carga de datos ====================
@@ -45,7 +45,7 @@ def sweep_train():
     state_columns = ['consumo_kWh', 'produccion_kWh', 'coste_euros', 'irradiancia_W_m2', 'num_placas', 'humedad']
     STATE_SIZE = len(state_columns) + 1  # +1 por battery_soc
     ACTION_SIZE = 3
-    NUM_EPISODES = 30
+    NUM_EPISODES = 150
     EPSILON_START = 1.0
     EPSILON_MIN = 0.1
     EPSILON_DECAY = 0.98
@@ -116,26 +116,49 @@ def sweep_train():
     # ================== Lógica de batería ====================
     def calcular_recompensa(row, action, battery_soc):
         precio = row['coste_euros']
-        capacidad = 13.5
-        max_potencia = 5.0
-        eficiencia = 0.95
+        consumo = row['consumo_kWh']
+        produccion = row['produccion_kWh']
+        
+        capacidad = 13.5  # Capacidad máxima batería (kWh)
+        max_potencia = 5.0  # Potencia máxima de carga/descarga (kW)
+        eficiencia = 0.95  # Eficiencia de carga/descarga
         beneficio = 0
 
-        if action == 1:  # comprar
-            energia_a_comprar = min(max_potencia, capacidad - battery_soc)
-            if energia_a_comprar > 0:
-                battery_soc += energia_a_comprar * eficiencia
-                beneficio = -energia_a_comprar * precio
+        # Balance neto de energía
+        energia_neta = produccion - consumo
 
-        elif action == 2:  # vender
-            energia_a_vender = min(max_potencia, battery_soc)
-            if energia_a_vender > 0:
-                battery_soc -= energia_a_vender / eficiencia
-                beneficio = energia_a_vender * precio
+        if action == 1:  # Cargar batería (comprar si hay déficit o energía barata)
+            energia_a_cargar = min(max_potencia, capacidad - battery_soc)
+            if energia_a_cargar > 0:
+                battery_soc += energia_a_cargar * eficiencia
+                coste = energia_a_cargar * precio
+                beneficio = -coste
 
-        # acción 0 o por defecto: mantener = sin cambio económico
+        elif action == 2:  # Descargar batería (vender si hay excedente o precio alto)
+            energia_a_descargar = min(max_potencia, battery_soc)
+            if energia_a_descargar > 0:
+                battery_soc -= energia_a_descargar / eficiencia
+                ingreso = energia_a_descargar * precio
+                beneficio = ingreso
+
+        elif action == 0:  # Usar batería para autoconsumo
+            # Si hay déficit y batería disponible, usar batería
+            if energia_neta < 0:
+                energia_necesaria = abs(energia_neta)
+                energia_de_bateria = min(energia_necesaria, battery_soc, max_potencia)
+                if energia_de_bateria > 0:
+                    battery_soc -= energia_de_bateria / eficiencia
+                    ahorro = energia_de_bateria * precio
+                    beneficio = ahorro  # Se ahorra lo que no se compra
+
+            # Si hay excedente y batería tiene espacio, almacenar energía gratis
+            elif energia_neta > 0:
+                energia_almacenable = min(energia_neta, capacidad - battery_soc, max_potencia)
+                if energia_almacenable > 0:
+                    battery_soc += energia_almacenable * eficiencia
+                    beneficio = 0  # Energía gratuita aprovechada
+
         return beneficio, battery_soc, beneficio
-
 
     # ================== Entrenamiento ====================
     agent = DQNAgent(STATE_SIZE, ACTION_SIZE)
@@ -167,7 +190,7 @@ def sweep_train():
 
             loss = agent.replay()
             if loss:
-                wandb.log({"loss": loss})
+                wandb.log({"loss": loss, "beneficio": beneficio})
 
         epsilon = max(EPSILON_MIN, epsilon * EPSILON_DECAY)
         wandb.log({
@@ -193,18 +216,19 @@ if __name__ == "__main__":
     modo = sys.argv[1] if len(sys.argv) > 1 else "sweep"
 
     if modo == "sweep":
-        sweep_id = "mpelaezdelarocha-u-tad/SmartGrids/7qraolf6"
+        #sweep_id = wandb.sweep(sweep_config, project="SmartGrids")
+        sweep_id = "mpelaezdelarocha-u-tad/SmartGrids/d6uizf9l"
         wandb.agent(sweep_id, function=sweep_train, count=10)
 
     elif modo == "single":
-        wandb.init(project="SmartGrids", name="DQN-Run-Manual", config={
-            "gamma": 0.99,
+        wandb.init(project="SmartGrids", name="DQN-Run-Manual-100_episodes", config={
+            "gamma": 0.9,
             "lr": 0.00005,
             "batch_size": 64,
             "hidden_size": 64,
             "num_layers": 2,
-            "memory_size": 5000,
-            "epsilon_decay": 0.95
+            "memory_size": 10000,
+            "epsilon_decay": 0.98
         })
         sweep_train()
 
