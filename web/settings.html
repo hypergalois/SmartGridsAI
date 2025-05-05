@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EcoTrack - Ajustes</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .settings-card {
+            transition: all 0.3s ease;
+        }
+        .settings-card:hover {
+            transform: translateY(-2px);
+        }
+        .tab-active {
+            position: relative;
+            color: #4F46E5;
+        }
+        .tab-active:after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 24px;
+            height: 3px;
+            background: #4F46E5;
+            border-radius: 3px;
+        }
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #E5E7EB;
+            transition: .4s;
+            border-radius: 24px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider {
+            background-color: #4F46E5;
+        }
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+        
+        /* Fix para el responsive */
+        html {
+            -webkit-text-size-adjust: 100%;
+            -webkit-tap-highlight-color: transparent;
+        }
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        main {
+            flex: 1;
+            padding-bottom: 80px; /* Espacio para el nav */
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans">
+    <!-- Header -->
+    <header class="bg-white p-4 shadow-sm sticky top-0 z-10">
+        <div class="flex justify-between items-center">
+            <div class="flex items-center">
+                <a href="index.html" class="mr-3 text-gray-500">
+                    <i class="fas fa-arrow-left"></i>
+                </a>
+                <div>
+                    <h1 class="text-xl font-bold">Ajustes</h1>
+                    <p class="text-xs text-gray-500">Personaliza tu experiencia</p>
+                </div>
+            </div>
+            <div class="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center">
+                <i class="fas fa-user text-indigo-500"></i>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="p-4">
+        <!-- User Profile -->
+        <div class="settings-card bg-white rounded-xl shadow-sm p-4 mb-6">
+            <div class="flex items-center mb-4">
+                <div class="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mr-3">
+                    <i class="fas fa-user text-indigo-500 text-2xl"></i>
+                </div>
+                <div>
+                    <h2 class="font-bold">Pablo Ramos</h2>
+                    <p class="text-sm text-gray-500">clientefeliz@superempresa.com</p>
+                </div>
+            </div>
+            <button class="w-full bg-indigo-100 text-indigo-600 py-2 rounded-lg font-medium text-sm">
+                Editar perfil
+            </button>
+        </div>
+
+        <!-- Settings Sections -->
+        <div class="space-y-4">
+            <!-- Account Settings -->
+            <div class="settings-card bg-white rounded-xl shadow-sm overflow-hidden">
+                <div class="p-4 border-b border-gray-100">
+                    <h3 class="font-medium flex items-center">
+                        <i class="fas fa-user-cog text-indigo-500 mr-2"></i>
+                        Cuenta
+                    </h3>
+                </div>
+                <div class="divide-y divide-gray-100">
+                    <a href="#" class="flex justify-between items-center p-4">
+                        <div class="flex items-center">
+                            <i class="fas fa-envelope text-gray-400 mr-3"></i>
+                            <span>Correo electrónico</span>
+                        </div>
+                        <i class="fas fa-chevron-right text-gray-400"></i>
+                    </a>
+                    <a href="#" class="flex justify-between items-center p-4">
+                        <div class="flex items-center">
+                            <i class="fas fa-lock text-gray-400 mr-3"></i>
+                            <span>Contraseña</span>
+                        </div>
+                        <i class="fas fa-chevron-right text-gray-400"></i>
+                    </a>
+                    <a href="#" class="flex justify-between items-center p-4">
+                        <div class="flex items-center">
+                            <i class="fas fa-shield-alt text-gray-400 mr-3"></i>
+                            <span>Seguridad</span>
+                        </div>
+                        <i class="fas fa-chevron-right text-gray-400"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- App Settings -->
+            <div class="settings-card bg-white rounded-xl shadow-sm overflow-hidden">
+                <div class="p-4 border-b border-gray-100">
+                    <h3 class="font-medium flex items-center">
+                        <i class="fas fa-mobile-alt text-blue-500 mr-2"></i>
+                        Aplicación
+                    </h3>
+                </div>
+                <div class="divide-y divide-gray-100">
+                    <div class="flex justify-between items-center p-4">
+                        <div class="flex items-center">
+                            <i class="fas fa-moon text-gray-400 mr-3"></i>
+                            <span>Modo oscuro</span>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <a href="#" class="flex justify-between items-center p-4">
+                        <div class="flex items-center">
+                            <i class="fas fa-bell text-gray-400 mr-3"></i>
+                            <span>Notificaciones</span>
+                        </div>
+                        <i class="fas fa-chevron-right text-gray-400"></i>
+                    </a>
+                    <div class="flex justify-between items-center p-4">
+                        <div class="flex items-center">
+                            <i class="fas fa-language text-gray-400 mr-3"></i>
+                            <span>Idioma</span>
+                        </div>
+                        <div class="flex items-center">
+                            <span class="text-gray-500 mr-2">Español</span>
+                            <i class="fas fa-chevron-right text-gray-400"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Energy Settings -->
+            <div class="settings-card bg-white rounded-xl shadow-sm overflow-hidden">
+                <div class="p-4 border-b border-gray-100">
+                    <h3 class="font-medium flex items-center">
+                        <i class="fas fa-bolt text-green-500 mr-2"></i>
+                        Energía
+                    </h3>
+                </div>
+                <div class="divide-y divide-gray-100">
+                    <div class="flex justify-between items-center p-4">
+                        <div class="flex items-center">
+                            <i class="fas fa-robot text-gray-400 mr-3"></i>
+                            <span>Automatización</span>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                    <a href="#" class="flex justify-between items-center p-4">
+                        <div class="flex items-center">
+                            <i class="fas fa-chart-pie text-gray-400 mr-3"></i>
+                            <span>Objetivos de consumo</span>
+                        </div>
+                        <i class="fas fa-chevron-right text-gray-400"></i>
+                    </a>
+                    <a href="#" class="flex justify-between items-center p-4">
+                        <div class="flex items-center">
+                            <i class="fas fa-tachometer-alt text-gray-400 mr-3"></i>
+                            <span>Umbrales de alerta</span>
+                        </div>
+                        <i class="fas fa-chevron-right text-gray-400"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Support -->
+            <div class="settings-card bg-white rounded-xl shadow-sm overflow-hidden">
+                <div class="p-4 border-b border-gray-100">
+                    <h3 class="font-medium flex items-center">
+                        <i class="fas fa-question-circle text-purple-500 mr-2"></i>
+                        Soporte
+                    </h3>
+                </div>
+                <div class="divide-y divide-gray-100">
+                    <a href="#" class="flex justify-between items-center p-4">
+                        <div class="flex items-center">
+                            <i class="fas fa-info-circle text-gray-400 mr-3"></i>
+                            <span>Acerca de</span>
+                        </div>
+                        <i class="fas fa-chevron-right text-gray-400"></i>
+                    </a>
+                    <a href="#" class="flex justify-between items-center p-4">
+                        <div class="flex items-center">
+                            <i class="fas fa-headset text-gray-400 mr-3"></i>
+                            <span>Centro de ayuda</span>
+                        </div>
+                        <i class="fas fa-chevron-right text-gray-400"></i>
+                    </a>
+                    <a href="#" class="flex justify-between items-center p-4">
+                        <div class="flex items-center">
+                            <i class="fas fa-envelope-open-text text-gray-400 mr-3"></i>
+                            <span>Contáctanos</span>
+                        </div>
+                        <i class="fas fa-chevron-right text-gray-400"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Logout Button -->
+            <button class="settings-card w-full bg-red-50 text-red-600 py-3 rounded-lg font-medium flex items-center justify-center mt-6">
+                <i class="fas fa-sign-out-alt mr-2"></i>
+                Cerrar sesión
+            </button>
+        </div>
+    </main>
+
+    <!-- Bottom Navigation -->
+    <nav class="bg-white py-2 px-6 flex justify-around fixed bottom-0 w-full border-t border-gray-200 z-10">
+        <a href="index.html" class="p-2 text-gray-500">
+            <i class="fas fa-home text-xl"></i>
+        </a>
+        <a href="stats.html" class="p-2 text-gray-500">
+            <i class="fas fa-chart-line text-xl"></i>
+        </a>
+        <a href="management.html" class="p-2 text-gray-500">
+            <i class="fas fa-bolt text-xl"></i>
+        </a>
+        <a href="#" class="p-2 text-indigo-600 tab-active">
+            <i class="fas fa-cog text-xl"></i>
+        </a>
+    </nav>
+
+    <script>
+        // Animación para las tarjetas de ajustes
+        document.querySelectorAll('.settings-card').forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                card.classList.add('shadow-md');
+            });
+            
+            card.addEventListener('mouseleave', () => {
+                card.classList.remove('shadow-md');
+            });
+        });
+
+        // Fix para el responsive al navegar
+        document.addEventListener('DOMContentLoaded', () => {
+            // Forzar recálculo del viewport en iOS
+            if (navigator.userAgent.match(/iPhone|iPad|iPod/i)) {
+                document.body.style.zoom = 'reset';
+                setTimeout(() => {
+                    document.body.style.zoom = '';
+                }, 10);
+            }
+            
+            // Resetear el viewport
+            const viewport = document.querySelector('meta[name="viewport"]');
+            if (viewport) {
+                viewport.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no';
+                setTimeout(() => {
+                    viewport.content = 'width=device-width, initial-scale=1.0';
+                }, 100);
+            }
+        });
+        
+        // Prevenir comportamiento por defecto en los enlaces
+        document.querySelectorAll('nav a').forEach(link => {
+            link.addEventListener('click', (e) => {
+                if (link.getAttribute('href') === '#') {
+                    e.preventDefault();
+                }
+            });
+        });
+        
+        // Toggle switches
+        document.querySelectorAll('.switch input').forEach(switchInput => {
+            switchInput.addEventListener('change', function() {
+                const parentCard = this.closest('.settings-card');
+                if (this.checked) {
+                    parentCard.classList.add('shadow-md');
+                    setTimeout(() => {
+                        parentCard.classList.remove('shadow-md');
+                    }, 300);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

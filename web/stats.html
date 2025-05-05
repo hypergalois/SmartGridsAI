@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EcoTrack - Estadísticas Detalladas</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .chart-container {
+            height: 250px;
+            width: 100%;
+        }
+        .stat-card {
+            transition: all 0.2s ease;
+        }
+        .stat-card:active {
+            transform: scale(0.98);
+        }
+        .tab-active {
+            position: relative;
+            color: #4F46E5;
+        }
+        .tab-active:after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 24px;
+            height: 3px;
+            background: #4F46E5;
+            border-radius: 3px;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans">
+    <!-- Header -->
+    <header class="bg-white p-4 shadow-sm sticky top-0 z-10">
+        <div class="flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <a href="index.html" class="text-gray-600">
+                    <i class="fas fa-arrow-left"></i>
+                </a>
+                <h1 class="text-xl font-bold">Estadísticas Detalladas</h1>
+            </div>
+            <div class="flex space-x-3">
+                <button id="exportPdf" class="text-gray-600">
+                    <i class="fas fa-file-pdf"></i>
+                </button>
+                <button id="shareStats" class="text-gray-600">
+                    <i class="fas fa-share-alt"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="p-4 pb-20">
+        <!-- Time Filters -->
+        <div class="flex items-center justify-between mb-4">
+            <div class="flex space-x-2 overflow-x-auto hide-scrollbar pb-2">
+                <button id="filterDay" class="px-3 py-1 bg-indigo-600 text-white rounded-full text-sm whitespace-nowrap">
+                    Día
+                </button>
+                <button id="filterWeek" class="px-3 py-1 bg-gray-100 rounded-full text-sm whitespace-nowrap">
+                    Semana
+                </button>
+                <button id="filterMonth" class="px-3 py-1 bg-gray-100 rounded-full text-sm whitespace-nowrap">
+                    Mes
+                </button>
+                <button id="filterYear" class="px-3 py-1 bg-gray-100 rounded-full text-sm whitespace-nowrap">
+                    Año
+                </button>
+                <button id="filterCustom" class="px-3 py-1 bg-gray-100 rounded-full text-sm whitespace-nowrap">
+                    Personalizado
+                </button>
+            </div>
+            <button id="calendarBtn" class="text-gray-500 p-1">
+                <i class="far fa-calendar-alt"></i>
+            </button>
+        </div>
+
+        <!-- Stats Summary -->
+        <div class="grid grid-cols-2 gap-3 mb-6">
+            <div class="stat-card bg-white p-3 rounded-lg shadow-sm">
+                <p class="text-xs text-gray-500">Consumo Total</p>
+                <p class="text-xl font-bold">48.2 <span class="text-sm font-normal">kWh</span></p>
+                <p class="text-xs mt-1 flex items-center">
+                    <i class="fas fa-arrow-up text-red-500 mr-1"></i>
+                    <span class="text-red-500">8% más</span>
+                </p>
+            </div>
+            <div class="stat-card bg-white p-3 rounded-lg shadow-sm">
+                <p class="text-xs text-gray-500">Generación Solar</p>
+                <p class="text-xl font-bold">32.5 <span class="text-sm font-normal">kWh</span></p>
+                <p class="text-xs mt-1 flex items-center">
+                    <i class="fas fa-arrow-up text-green-500 mr-1"></i>
+                    <span class="text-green-500">15% más</span>
+                </p>
+            </div>
+            <div class="stat-card bg-white p-3 rounded-lg shadow-sm">
+                <p class="text-xs text-gray-500">Ahorro Total</p>
+                <p class="text-xl font-bold">$9.75</p>
+                <p class="text-xs mt-1 text-gray-500">vs. periodo anterior</p>
+            </div>
+            <div class="stat-card bg-white p-3 rounded-lg shadow-sm">
+                <p class="text-xs text-gray-500">Eficiencia</p>
+                <p class="text-xl font-bold">87%</p>
+                <p class="text-xs mt-1 text-gray-500">de autosuficiencia</p>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="flex border-b border-gray-200 mb-4">
+            <button id="tabEnergy" class="tab-active py-2 px-4 font-medium text-sm">Energía</button>
+            <button id="tabCosts" class="py-2 px-4 font-medium text-sm text-gray-500">Costos</button>
+            <button id="tabEfficiency" class="py-2 px-4 font-medium text-sm text-gray-500">Eficiencia</button>
+        </div>
+
+        <!-- Energy Chart -->
+        <div id="energyChartContainer" class="bg-white rounded-xl shadow-sm p-4 mb-6">
+            <div class="flex justify-between items-center mb-3">
+                <h3 class="font-medium text-sm">Balance Energético</h3>
+                <div class="flex space-x-1">
+                    <button id="energyChartZoom" class="text-gray-500 p-1">
+                        <i class="fas fa-search-plus"></i>
+                    </button>
+                    <button id="energyChartInfo" class="text-gray-500 p-1">
+                        <i class="fas fa-info-circle"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="chart-container">
+                <canvas id="energyChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Hourly Breakdown -->
+        <div class="bg-white rounded-xl shadow-sm p-4 mb-6">
+            <div class="flex justify-between items-center mb-3">
+                <h3 class="font-medium text-sm">Desglose por Horas</h3>
+                <button id="toggleHourlyView" class="text-indigo-600 text-xs font-medium">
+                    <i class="fas fa-table mr-1"></i> Ver tabla
+                </button>
+            </div>
+            
+            <div class="overflow-x-auto hide-scrollbar">
+                <div class="flex space-x-4" style="width: 150%;">
+                    <div class="text-center">
+                        <p class="text-xs text-gray-500">12 AM</p>
+                        <div class="h-20 w-10 bg-indigo-100 rounded mt-1 relative">
+                            <div class="absolute bottom-0 w-full bg-indigo-500 rounded" style="height: 30%;"></div>
+                        </div>
+                    </div>
+                    <div class="text-center">
+                        <p class="text-xs text-gray-500">3 AM</p>
+                        <div class="h-20 w-10 bg-indigo-100 rounded mt-1 relative">
+                            <div class="absolute bottom-0 w-full bg-indigo-500 rounded" style="height: 25%;"></div>
+                        </div>
+                    </div>
+                    <div class="text-center">
+                        <p class="text-xs text-gray-500">6 AM</p>
+                        <div class="h-20 w-10 bg-indigo-100 rounded mt-1 relative">
+                            <div class="absolute bottom-0 w-full bg-indigo-500 rounded" style="height: 40%;"></div>
+                        </div>
+                    </div>
+                    <div class="text-center">
+                        <p class="text-xs text-gray-500">9 AM</p>
+                        <div class="h-20 w-10 bg-indigo-100 rounded mt-1 relative">
+                            <div class="absolute bottom-0 w-full bg-indigo-500 rounded" style="height: 60%;"></div>
+                        </div>
+                    </div>
+                    <div class="text-center">
+                        <p class="text-xs text-gray-500">12 PM</p>
+                        <div class="h-20 w-10 bg-indigo-100 rounded mt-1 relative">
+                            <div class="absolute bottom-0 w-full bg-indigo-500 rounded" style="height: 75%;"></div>
+                        </div>
+                    </div>
+                    <div class="text-center">
+                        <p class="text-xs text-gray-500">3 PM</p>
+                        <div class="h-20 w-10 bg-indigo-100 rounded mt-1 relative">
+                            <div class="absolute bottom-0 w-full bg-indigo-500 rounded" style="height: 80%;"></div>
+                        </div>
+                    </div>
+                    <div class="text-center">
+                        <p class="text-xs text-gray-500">6 PM</p>
+                        <div class="h-20 w-10 bg-indigo-100 rounded mt-1 relative">
+                            <div class="absolute bottom-0 w-full bg-indigo-500 rounded" style="height: 65%;"></div>
+                        </div>
+                    </div>
+                    <div class="text-center">
+                        <p class="text-xs text-gray-500">9 PM</p>
+                        <div class="h-20 w-10 bg-indigo-100 rounded mt-1 relative">
+                            <div class="absolute bottom-0 w-full bg-indigo-500 rounded" style="height: 45%;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Device Breakdown -->
+        <div class="bg-white rounded-xl shadow-sm p-4">
+            <div class="flex justify-between items-center mb-3">
+                <h3 class="font-medium text-sm">Consumo por Dispositivo</h3>
+                <button id="deviceSort" class="text-indigo-600 text-xs font-medium">
+                    <i class="fas fa-sort-amount-down mr-1"></i> Ordenar
+                </button>
+            </div>
+            
+            <div class="space-y-3">
+                <div class="flex items-center">
+                    <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                        <i class="fas fa-thermometer-half text-blue-500"></i>
+                    </div>
+                    <div class="flex-1">
+                        <p class="text-sm">Aire Acondicionado</p>
+                        <div class="w-full bg-gray-100 rounded-full h-1.5 mt-1">
+                            <div class="bg-blue-500 h-1.5 rounded-full" style="width: 45%"></div>
+                        </div>
+                    </div>
+                    <p class="text-xs text-gray-500 ml-2">12.4 kWh</p>
+                </div>
+                
+                <div class="flex items-center">
+                    <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center mr-3">
+                        <i class="fas fa-lightbulb text-green-500"></i>
+                    </div>
+                    <div class="flex-1">
+                        <p class="text-sm">Iluminación</p>
+                        <div class="w-full bg-gray-100 rounded-full h-1.5 mt-1">
+                            <div class="bg-green-500 h-1.5 rounded-full" style="width: 22%"></div>
+                        </div>
+                    </div>
+                    <p class="text-xs text-gray-500 ml-2">6.1 kWh</p>
+                </div>
+                
+                <div class="flex items-center">
+                    <div class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center mr-3">
+                        <i class="fas fa-tv text-purple-500"></i>
+                    </div>
+                    <div class="flex-1">
+                        <p class="text-sm">Electrodomésticos</p>
+                        <div class="w-full bg-gray-100 rounded-full h-1.5 mt-1">
+                            <div class="bg-purple-500 h-1.5 rounded-full" style="width: 18%"></div>
+                        </div>
+                    </div>
+                    <p class="text-xs text-gray-500 ml-2">5.0 kWh</p>
+                </div>
+                
+                <div class="flex items-center">
+                    <div class="w-8 h-8 bg-amber-100 rounded-full flex items-center justify-center mr-3">
+                        <i class="fas fa-plug text-amber-500"></i>
+                    </div>
+                    <div class="flex-1">
+                        <p class="text-sm">Standby</p>
+                        <div class="w-full bg-gray-100 rounded-full h-1.5 mt-1">
+                            <div class="bg-amber-500 h-1.5 rounded-full" style="width: 15%"></div>
+                        </div>
+                    </div>
+                    <p class="text-xs text-gray-500 ml-2">4.2 kWh</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Bottom Navigation -->
+    <nav class="bg-white py-2 px-6 flex justify-around fixed bottom-0 w-full border-t border-gray-200">
+        <a href="index.html" class="p-2 text-gray-500">
+            <i class="fas fa-home text-xl"></i>
+        </a>
+        <a href="stats.html" class="p-2 text-indigo-600">
+            <i class="fas fa-chart-line text-xl"></i>
+        </a>
+        <a href="management.html" class="p-2 text-gray-500">
+            <i class="fas fa-bolt text-xl"></i>
+        </a>
+        <a href="settings.html" class="p-2 text-gray-500">
+            <i class="fas fa-cog text-xl"></i>
+        </a>
+    </nav>
+
+    <script>
+        // Datos de ejemplo para los gráficos
+        const energyData = {
+            labels: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
+            consumption: [12.4, 11.8, 13.2, 14.0, 12.1, 10.5, 9.8],
+            solar: [8.2, 9.1, 8.5, 7.8, 9.4, 10.2, 11.0],
+            grid: [4.2, 2.7, 4.7, 6.2, 2.7, 0.3, -1.2]
+        };
+
+        // Inicializar gráficos
+        function initCharts() {
+            // Gráfico de energía
+            const energyCtx = document.getElementById('energyChart').getContext('2d');
+            new Chart(energyCtx, {
+                type: 'bar',
+                data: {
+                    labels: energyData.labels,
+                    datasets: [
+                        {
+                            label: 'Consumo',
+                            data: energyData.consumption,
+                            backgroundColor: '#4F46E5',
+                            borderRadius: 4
+                        },
+                        {
+                            label: 'Solar',
+                            data: energyData.solar,
+                            backgroundColor: '#F59E0B',
+                            borderRadius: 4
+                        },
+                        {
+                            label: 'Red',
+                            data: energyData.grid,
+                            backgroundColor: '#10B981',
+                            borderRadius: 4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                usePointStyle: true,
+                                padding: 20
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: ctx => `${ctx.dataset.label}: ${ctx.raw} kWh`
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                drawBorder: false
+                            },
+                            ticks: {
+                                callback: value => `${value} kWh`
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Manejar eventos
+        function setupEventListeners() {
+            // Filtros de tiempo
+            document.getElementById('filterDay').addEventListener('click', () => {
+                updateTimeFilter('filterDay');
+                alert('Mostrando datos del día');
+            });
+            
+            document.getElementById('filterWeek').addEventListener('click', () => {
+                updateTimeFilter('filterWeek');
+                alert('Mostrando datos de la semana');
+            });
+            
+            document.getElementById('filterMonth').addEventListener('click', () => {
+                updateTimeFilter('filterMonth');
+                alert('Mostrando datos del mes');
+            });
+            
+            document.getElementById('filterYear').addEventListener('click', () => {
+                updateTimeFilter('filterYear');
+                alert('Mostrando datos del año');
+            });
+            
+            document.getElementById('filterCustom').addEventListener('click', () => {
+                updateTimeFilter('filterCustom');
+                alert('Selecciona un rango personalizado');
+            });
+
+            // Botón de calendario
+            document.getElementById('calendarBtn').addEventListener('click', () => {
+                alert('Selecciona una fecha específica');
+            });
+
+            // Pestañas
+            document.getElementById('tabEnergy').addEventListener('click', () => {
+                updateTab('tabEnergy');
+            });
+            
+            document.getElementById('tabCosts').addEventListener('click', () => {
+                updateTab('tabCosts');
+                alert('Mostrando gráficos de costos');
+            });
+            
+            document.getElementById('tabEfficiency').addEventListener('click', () => {
+                updateTab('tabEfficiency');
+                alert('Mostrando gráficos de eficiencia');
+            });
+
+            // Botones varios
+            document.getElementById('energyChartZoom').addEventListener('click', () => {
+                alert('Zoom en el gráfico de energía');
+            });
+            
+            document.getElementById('energyChartInfo').addEventListener('click', () => {
+                alert('Información sobre los datos mostrados');
+            });
+            
+            document.getElementById('toggleHourlyView').addEventListener('click', () => {
+                alert('Cambiando a vista de tabla horaria');
+            });
+            
+            document.getElementById('deviceSort').addEventListener('click', () => {
+                alert('Ordenando dispositivos por consumo');
+            });
+            
+            document.getElementById('exportPdf').addEventListener('click', () => {
+                alert('Exportando estadísticas a PDF');
+            });
+            
+            document.getElementById('shareStats').addEventListener('click', () => {
+                alert('Compartiendo estadísticas');
+            });
+        }
+
+        // Actualizar filtro de tiempo activo
+        function updateTimeFilter(activeId) {
+            const filters = ['filterDay', 'filterWeek', 'filterMonth', 'filterYear', 'filterCustom'];
+            filters.forEach(id => {
+                const btn = document.getElementById(id);
+                if (id === activeId) {
+                    btn.classList.remove('bg-gray-100');
+                    btn.classList.add('bg-indigo-600', 'text-white');
+                } else {
+                    btn.classList.remove('bg-indigo-600', 'text-white');
+                    btn.classList.add('bg-gray-100');
+                }
+            });
+        }
+
+        // Actualizar pestaña activa
+        function updateTab(activeId) {
+            const tabs = ['tabEnergy', 'tabCosts', 'tabEfficiency'];
+            tabs.forEach(id => {
+                const tab = document.getElementById(id);
+                if (id === activeId) {
+                    tab.classList.add('tab-active');
+                    tab.classList.remove('text-gray-500');
+                } else {
+                    tab.classList.remove('tab-active');
+                    tab.classList.add('text-gray-500');
+                }
+            });
+        }
+
+        // Inicializar la aplicación
+        document.addEventListener('DOMContentLoaded', () => {
+            initCharts();
+            setupEventListeners();
+        });
+    </script>
+</body>
+</html>

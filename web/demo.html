@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EcoPredict AI | Smart Energy Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #6B73FF 0%, #000DFF 50%, #0085FF 100%);
+        }
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        .pulse-animation {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans">
+    <!-- Header -->
+    <header class="gradient-bg text-white">
+        <div class="container mx-auto px-4 py-8">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center space-x-2">
+                    <i class="fas fa-bolt text-2xl"></i>
+                    <h1 class="text-2xl font-bold">EcoPredict AI</h1>
+                </div>
+                <nav class="hidden md:flex space-x-8">
+                    <a href="#" class="hover:text-blue-200 transition">Features</a>
+                    <a href="#" class="hover:text-blue-200 transition">How It Works</a>
+                    <a href="#" class="hover:text-blue-200 transition">Pricing</a>
+                    <a href="#" class="hover:text-blue-200 transition">Contact</a>
+                </nav>
+                <button class="md:hidden text-xl">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+            
+            <div class="mt-16 mb-20 text-center">
+                <h2 class="text-4xl md:text-5xl font-bold mb-6">Smart Energy Decisions Made Simple</h2>
+                <p class="text-xl md:text-2xl opacity-90 max-w-3xl mx-auto">
+                    Our AI predicts energy prices and solar production to optimize your home's energy usage automatically
+                </p>
+                <div class="mt-10">
+                    <button class="bg-white text-blue-600 font-bold px-8 py-3 rounded-full hover:bg-blue-100 transition mr-4">
+                        Get Started
+                    </button>
+                    <button class="border-2 border-white text-white font-bold px-8 py-3 rounded-full hover:bg-white hover:text-blue-600 transition">
+                        Watch Demo
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-4 py-12">
+        <!-- Dashboard Section -->
+        <section class="mb-20">
+            <h2 class="text-3xl font-bold text-center mb-12">Your Energy Dashboard</h2>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+                <!-- Current Status Card -->
+                <div class="bg-white rounded-xl shadow-md p-6 card-hover transition">
+                    <div class="flex items-center mb-4">
+                        <div class="bg-blue-100 p-3 rounded-full mr-4">
+                            <i class="fas fa-chart-line text-blue-600 text-xl"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold">Current Energy Status</h3>
+                    </div>
+                    <div class="flex justify-between items-center mb-4">
+                        <div>
+                            <p class="text-gray-500">Current Price</p>
+                            <p class="text-2xl font-bold">$0.18/kWh</p>
+                        </div>
+                        <div class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">
+                            <i class="fas fa-arrow-down mr-1"></i> 12% below average
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <p class="text-gray-500 mb-2">AI Recommendation</p>
+                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 flex items-center">
+                            <div class="bg-blue-600 text-white p-2 rounded-full mr-3">
+                                <i class="fas fa-bolt"></i>
+                            </div>
+                            <div>
+                                <p class="font-semibold">Buy Energy Now</p>
+                                <p class="text-sm text-gray-600">Prices expected to rise 22% in next 2 hours</p>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition">
+                        Execute Recommendation
+                    </button>
+                </div>
+                
+                <!-- Solar Production Card -->
+                <div class="bg-white rounded-xl shadow-md p-6 card-hover transition">
+                    <div class="flex items-center mb-4">
+                        <div class="bg-yellow-100 p-3 rounded-full mr-4">
+                            <i class="fas fa-solar-panel text-yellow-600 text-xl"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold">Solar Production</h3>
+                    </div>
+                    <div class="mb-4">
+                        <p class="text-gray-500">Today's Forecast</p>
+                        <div class="flex items-end mt-2">
+                            <p class="text-2xl font-bold mr-2">8.2 kWh</p>
+                            <p class="text-green-600 font-medium"><i class="fas fa-arrow-up mr-1"></i>15%</p>
+                        </div>
+                        <p class="text-sm text-gray-500">Compared to yesterday</p>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="solarChart"></canvas>
+                    </div>
+                    <div class="text-center mt-4">
+                        <button class="text-blue-600 font-medium hover:text-blue-800 transition">
+                            View Detailed Forecast <i class="fas fa-chevron-right ml-1"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Savings Overview Card -->
+                <div class="bg-white rounded-xl shadow-md p-6 card-hover transition">
+                    <div class="flex items-center mb-4">
+                        <div class="bg-green-100 p-3 rounded-full mr-4">
+                            <i class="fas fa-piggy-bank text-green-600 text-xl"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold">Savings Overview</h3>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4 mb-6">
+                        <div class="bg-gray-50 p-3 rounded-lg">
+                            <p class="text-gray-500 text-sm">Today's Savings</p>
+                            <p class="text-xl font-bold text-green-600">$3.42</p>
+                        </div>
+                        <div class="bg-gray-50 p-3 rounded-lg">
+                            <p class="text-gray-500 text-sm">This Month</p>
+                            <p class="text-xl font-bold text-green-600">$78.15</p>
+                        </div>
+                        <div class="bg-gray-50 p-3 rounded-lg">
+                            <p class="text-gray-500 text-sm">Last Month</p>
+                            <p class="text-xl font-bold">$65.90</p>
+                        </div>
+                        <div class="bg-gray-50 p-3 rounded-lg">
+                            <p class="text-gray-500 text-sm">Annual Projection</p>
+                            <p class="text-xl font-bold text-green-600">$938.00</p>
+                        </div>
+                    </div>
+                    <div class="bg-blue-50 rounded-lg p-3">
+                        <div class="flex items-center">
+                            <div class="bg-blue-100 p-2 rounded-full mr-3">
+                                <i class="fas fa-lightbulb text-blue-600"></i>
+                            </div>
+                            <div>
+                                <p class="font-medium">Tip of the Day</p>
+                                <p class="text-sm text-gray-600">Run your dishwasher after 8PM when energy prices drop by 18%</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Energy Price Graph -->
+            <div class="bg-white rounded-xl shadow-md p-6 mb-8">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-semibold">Energy Price Forecast</h3>
+                    <div class="flex space-x-2">
+                        <button id="todayBtn" class="px-3 py-1 bg-blue-600 text-white rounded-lg text-sm">Today</button>
+                        <button id="weekBtn" class="px-3 py-1 bg-gray-100 rounded-lg text-sm hover:bg-gray-200">Week</button>
+                        <button id="monthBtn" class="px-3 py-1 bg-gray-100 rounded-lg text-sm hover:bg-gray-200">Month</button>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="energyChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Historical Data Section -->
+            <div class="bg-white rounded-xl shadow-md p-6 mb-8">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-semibold">Historical Energy Data</h3>
+                    <div>
+                        <button id="importCsvBtn" class="px-3 py-1 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700 mr-2">
+                            <i class="fas fa-file-import mr-1"></i>Import CSV
+                        </button>
+                        <input type="file" id="csvFileInput" accept=".csv" class="hidden">
+                        <button id="exportCsvBtn" class="px-3 py-1 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700">
+                            <i class="fas fa-file-export mr-1"></i>Export CSV
+                        </button>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <canvas id="historicalChart"></canvas>
+                </div>
+            </div>
+        </section>
+        
+        <!-- How It Works Section -->
+        <section class="mb-20">
+            <h2 class="text-3xl font-bold text-center mb-12">How EcoPredict AI Works</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="bg-white rounded-xl shadow-md p-8 text-center card-hover transition">
+                    <div class="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <i class="fas fa-cloud-sun text-blue-600 text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-3">Weather Analysis</h3>
+                    <p class="text-gray-600">
+                        Our AI analyzes hyper-local weather forecasts to predict solar panel output with 94% accuracy.
+                    </p>
+                </div>
+                
+                <div class="bg-white rounded-xl shadow-md p-8 text-center card-hover transition">
+                    <div class="bg-purple-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <i class="fas fa-chart-bar text-purple-600 text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-3">Market Prediction</h3>
+                    <p class="text-gray-600">
+                        We process real-time energy market data to forecast price fluctuations 12-36 hours in advance.
+                    </p>
+                </div>
+                
+                <div class="bg-white rounded-xl shadow-md p-8 text-center card-hover transition">
+                    <div class="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <i class="fas fa-robot text-green-600 text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-3">Smart Automation</h3>
+                    <p class="text-gray-600">
+                        The system automatically adjusts your energy usage or storage based on optimal cost-benefit analysis.
+                    </p>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Testimonials Section -->
+        <section class="mb-20">
+            <h2 class="text-3xl font-bold text-center mb-12">What Our Users Say</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="bg-white rounded-xl shadow-md p-8 card-hover transition">
+                    <div class="flex items-center mb-6">
+                        <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="User" class="w-12 h-12 rounded-full mr-4">
+                        <div>
+                            <h4 class="font-semibold">Sarah Johnson</h4>
+                            <p class="text-gray-500 text-sm">Homeowner in California</p>
+                        </div>
+                    </div>
+                    <p class="text-gray-700 mb-4">
+                        "EcoPredict AI saved me $127 last month alone by automatically shifting my energy usage to off-peak times. The solar production forecasts are incredibly accurate!"
+                    </p>
+                    <div class="flex text-yellow-400">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-xl shadow-md p-8 card-hover transition">
+                    <div class="flex items-center mb-6">
+                        <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="User" class="w-12 h-12 rounded-full mr-4">
+                        <div>
+                            <h4 class="font-semibold">Michael Chen</h4>
+                            <p class="text-gray-500 text-sm">Solar Panel Owner in Texas</p>
+                        </div>
+                    </div>
+                    <p class="text-gray-700 mb-4">
+                        "The AI's recommendations on when to store vs. sell back to the grid have maximized my solar investment. I've seen a 23% increase in ROI since using this system."
+                    </p>
+                    <div class="flex text-yellow-400">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star-half-alt"></i>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- CTA Section -->
+        <section class="gradient-bg text-white rounded-2xl p-12 text-center">
+            <h2 class="text-3xl font-bold mb-6">Ready to Optimize Your Energy?</h2>
+            <p class="text-xl opacity-90 max-w-2xl mx-auto mb-8">
+                Join thousands of homeowners who are saving money and reducing their carbon footprint with intelligent energy management.
+            </p>
+            <div class="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
+                <button class="bg-white text-blue-600 font-bold px-8 py-3 rounded-full hover:bg-blue-100 transition">
+                    Start Free Trial
+                </button>
+                <button class="border-2 border-white text-white font-bold px-8 py-3 rounded-full hover:bg-white hover:text-blue-600 transition">
+                    Schedule Demo
+                </button>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+                <div>
+                    <div class="flex items-center space-x-2 mb-4">
+                        <i class="fas fa-bolt text-2xl"></i>
+                        <h3 class="text-xl font-bold">EcoPredict AI</h3>
+                    </div>
+                    <p class="text-gray-400 mb-4">
+                        Intelligent energy management powered by artificial intelligence.
+                    </p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-400 hover:text-white transition"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-white transition"><i class="fab fa-facebook"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-white transition"><i class="fab fa-linkedin"></i></a>
+                        <a href="#" class="text-gray-400 hover:text-white transition"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+                
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Product</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white transition">Features</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition">Pricing</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition">API</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition">Integrations</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Resources</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white transition">Documentation</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition">Guides</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition">Blog</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition">Support</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="text-lg font-semibold mb-4">Company</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white transition">About</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition">Careers</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition">Privacy</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition">Terms</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="pt-8 border-t border-gray-800 text-center text-gray-400">
+                <p>&copy; 2025 EcoPredict AI. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Mock CSV data for energy prices and solar production
+        const mockEnergyCsv = `timestamp,price,solar_production,recommendation
+2023-06-01 00:00:00,0.12,0.0,save
+2023-06-01 01:00:00,0.11,0.0,save
+2023-06-01 02:00:00,0.10,0.0,save
+2023-06-01 03:00:00,0.09,0.0,buy
+2023-06-01 04:00:00,0.10,0.0,buy
+2023-06-01 05:00:00,0.12,0.2,buy
+2023-06-01 06:00:00,0.15,1.5,buy
+2023-06-01 07:00:00,0.18,3.2,save
+2023-06-01 08:00:00,0.20,5.1,save
+2023-06-01 09:00:00,0.22,6.8,sell
+2023-06-01 10:00:00,0.23,7.5,sell
+2023-06-01 11:00:00,0.24,8.2,sell
+2023-06-01 12:00:00,0.25,8.5,sell
+2023-06-01 13:00:00,0.24,8.0,sell
+2023-06-01 14:00:00,0.22,7.0,sell
+2023-06-01 15:00:00,0.20,5.8,save
+2023-06-01 16:00:00,0.18,4.2,save
+2023-06-01 17:00:00,0.16,2.5,save
+2023-06-01 18:00:00,0.15,1.0,buy
+2023-06-01 19:00:00,0.14,0.2,buy
+2023-06-01 20:00:00,0.13,0.0,buy
+2023-06-01 21:00:00,0.12,0.0,save
+2023-06-01 22:00:00,0.12,0.0,save
+2023-06-01 23:00:00,0.11,0.0,save`;
+
+        // Parse the mock CSV data
+        const parsedData = Papa.parse(mockEnergyCsv, { header: true }).data;
+        
+        // Extract data for charts
+        const timestamps = parsedData.map(row => row.timestamp.split(' ')[1].substring(0, 5));
+        const prices = parsedData.map(row => parseFloat(row.price));
+        const solarProduction = parsedData.map(row => parseFloat(row.solar_production));
+        const recommendations = parsedData.map(row => row.recommendation);
+
+        // Create solar production chart
+        const solarCtx = document.getElementById('solarChart').getContext('2d');
+        const solarChart = new Chart(solarCtx, {
+            type: 'line',
+            data: {
+                labels: timestamps,
+                datasets: [{
+                    label: 'Solar Production (kWh)',
+                    data: solarProduction,
+                    backgroundColor: 'rgba(234, 179, 8, 0.2)',
+                    borderColor: 'rgba(234, 179, 8, 1)',
+                    borderWidth: 2,
+                    tension: 0.3,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return `Production: ${context.parsed.y} kWh`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'kWh'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    }
+                }
+            }
+        });
+
+        // Create energy price chart
+        const energyCtx = document.getElementById('energyChart').getContext('2d');
+        const energyChart = new Chart(energyCtx, {
+            type: 'bar',
+            data: {
+                labels: timestamps,
+                datasets: [{
+                    label: 'Energy Price ($/kWh)',
+                    data: prices,
+                    backgroundColor: recommendations.map(rec => {
+                        return rec === 'buy' ? 'rgba(59, 130, 246, 0.7)' : 
+                               rec === 'sell' ? 'rgba(16, 185, 129, 0.7)' : 
+                               'rgba(156, 163, 175, 0.7)';
+                    }),
+                    borderColor: 'rgba(59, 130, 246, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return `Price: $${context.parsed.y}/kWh`;
+                            },
+                            afterLabel: function(context) {
+                                return `Recommendation: ${recommendations[context.dataIndex].toUpperCase()}`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: '$/kWh'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    }
+                }
+            }
+        });
+
+        // Create historical data chart (line chart)
+        const historicalCtx = document.getElementById('historicalChart').getContext('2d');
+        const historicalChart = new Chart(historicalCtx, {
+            type: 'line',
+            data: {
+                labels: timestamps,
+                datasets: [
+                    {
+                        label: 'Energy Price ($/kWh)',
+                        data: prices,
+                        borderColor: 'rgba(59, 130, 246, 1)',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        borderWidth: 2,
+                        yAxisID: 'y',
+                        tension: 0.3
+                    },
+                    {
+                        label: 'Solar Production (kWh)',
+                        data: solarProduction,
+                        borderColor: 'rgba(234, 179, 8, 1)',
+                        backgroundColor: 'rgba(234, 179, 8, 0.1)',
+                        borderWidth: 2,
+                        yAxisID: 'y1',
+                        tension: 0.3
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: {
+                    mode: 'index',
+                    intersect: false,
+                },
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                if (context.parsed.y !== null) {
+                                    label += context.datasetIndex === 0 ? 
+                                        `$${context.parsed.y}` : 
+                                        `${context.parsed.y} kWh`;
+                                }
+                                return label;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        type: 'linear',
+                        display: true,
+                        position: 'left',
+                        title: {
+                            display: true,
+                            text: 'Price ($/kWh)'
+                        }
+                    },
+                    y1: {
+                        type: 'linear',
+                        display: true,
+                        position: 'right',
+                        title: {
+                            display: true,
+                            text: 'Production (kWh)'
+                        },
+                        grid: {
+                            drawOnChartArea: false
+                        }
+                    }
+                }
+            }
+        });
+
+        // Time period buttons functionality
+        document.getElementById('todayBtn').addEventListener('click', function() {
+            // In a real app, this would fetch new data for today
+            alert("Showing data for today. In a real app, this would fetch new data.");
+        });
+
+        document.getElementById('weekBtn').addEventListener('click', function() {
+            alert("Showing data for this week. In a real app, this would fetch new data.");
+        });
+
+        document.getElementById('monthBtn').addEventListener('click', function() {
+            alert("Showing data for this month. In a real app, this would fetch new data.");
+        });
+
+        // CSV import/export functionality
+        document.getElementById('importCsvBtn').addEventListener('click', function() {
+            document.getElementById('csvFileInput').click();
+        });
+
+        document.getElementById('csvFileInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                Papa.parse(file, {
+                    header: true,
+                    complete: function(results) {
+                        alert(`Successfully imported ${results.data.length} records from CSV`);
+                        // In a real app, you would update the charts with the new data
+                    },
+                    error: function(error) {
+                        alert("Error parsing CSV file: " + error.message);
+                    }
+                });
+            }
+        });
+
+        document.getElementById('exportCsvBtn').addEventListener('click', function() {
+            // Create CSV from current data
+            const csv = Papa.unparse({
+                fields: ["timestamp", "price", "solar_production", "recommendation"],
+                data: parsedData
+            });
+            
+            // Create download link
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.setAttribute('href', url);
+            link.setAttribute('download', 'energy_data_export.csv');
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        });
+
+        // Simple demo functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            // Simulate loading data
+            setTimeout(() => {
+                const recommendationCard = document.querySelector('.pulse-animation');
+                if (recommendationCard) {
+                    recommendationCard.classList.remove('pulse-animation');
+                }
+            }, 3000);
+        });
+    </script>
+</body>
+</html>
