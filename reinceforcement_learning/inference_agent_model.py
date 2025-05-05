@@ -4,13 +4,15 @@ import numpy as np
 import pandas as pd
 
 # ======= CONFIGURACIÓN =======
-MODEL_PATH = "dqn_model_DQN-Sweep.pth"  # Cambia si tienes un nombre específico
+MODEL_PATH = "dqn_model_agente_eléctrico.pth"  # Ruta al modelo guardado
 CASA_ID = 3234
 BATERIA_CAPACIDAD = 13.5
 BATERIA_MAX_POTENCIA = 5.0
 BATERIA_EFICIENCIA = 0.95
+HIDDEN_SIZE = 64  # Debe coincidir con el usado en entrenamiento
+NUM_LAYERS = 2    # Debe coincidir también
 
-# === CARGA DEL MODELO ===
+# ======= CARGA DEL MODELO =======
 class DQN(nn.Module):
     def __init__(self, state_size, action_size, hidden_size=64, num_layers=2):
         super().__init__()
@@ -24,30 +26,29 @@ class DQN(nn.Module):
     def forward(self, x):
         return self.network(x)
 
-STATE_COLUMNS = ['consumo_kWh', 'produccion_kWh', 'coste_euros', 'irradiancia_W_m2', 'num_placas', 'humedad']
+STATE_COLUMNS = ['consumo_kWh', 'produccion_kWh', 'coste_euros']
 STATE_SIZE = len(STATE_COLUMNS) + 1  # + battery_soc
 ACTION_SIZE = 3
 
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-model = DQN(STATE_SIZE, ACTION_SIZE)
+device = torch.device('cpu')  # Forzamos CPU para evitar problemas con CUDA
+model = DQN(STATE_SIZE, ACTION_SIZE, hidden_size=HIDDEN_SIZE, num_layers=NUM_LAYERS)
 model.load_state_dict(torch.load(MODEL_PATH, map_location=device))
 model.to(device)
 model.eval()
 
-# === CARGA DE DATOS ===
+# ======= CARGA DE DATOS =======
 df_consumo = pd.read_csv("datasets/dataset_consumo.csv")
 df_produccion = pd.read_csv("datasets/dataset_produccion.csv")
 df = pd.merge(df_consumo, df_produccion, on=["datetime", "id_casa"], how="inner")
 df.sort_values(['id_casa', 'datetime'], inplace=True)
 df_casa = df[df['id_casa'] == CASA_ID].copy().reset_index(drop=True)
 
-# Tomamos 1 día (24 horas)
-df_dia = df_casa.head(24).copy()
+# Últimas 24 horas
+df_dia = df_casa.tail(24).copy().reset_index(drop=True)
 
-# === INFERENCIA HORA A HORA ===
-battery_soc = BATERIA_CAPACIDAD / 2
+# ======= INFERENCIA =======
+battery_soc = BATERIA_CAPACIDAD / 4
 beneficio_total = 0
-
 acciones = {0: "Mantener", 1: "Comprar", 2: "Vender"}
 
 print(f"\nInferencia para la casa {CASA_ID}, batería inicial al 50% ({battery_soc:.2f} kWh)\n")

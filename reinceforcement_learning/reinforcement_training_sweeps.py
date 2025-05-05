@@ -42,10 +42,10 @@ def sweep_train():
     df.sort_values(['id_casa', 'datetime'], inplace=True, ignore_index=True)
     df_casa = df[df['id_casa'] == 3234].copy().reset_index(drop=True)
 
-    state_columns = ['consumo_kWh', 'produccion_kWh', 'coste_euros', 'irradiancia_W_m2', 'num_placas', 'humedad']
+    state_columns = ['consumo_kWh', 'produccion_kWh', 'coste_euros']
     STATE_SIZE = len(state_columns) + 1  # +1 por battery_soc
     ACTION_SIZE = 3
-    NUM_EPISODES = 150
+    NUM_EPISODES = 75
     EPSILON_START = 1.0
     EPSILON_MIN = 0.1
     EPSILON_DECAY = 0.98
@@ -221,10 +221,10 @@ if __name__ == "__main__":
         wandb.agent(sweep_id, function=sweep_train, count=10)
 
     elif modo == "single":
-        wandb.init(project="SmartGrids", name="DQN-Run-Manual-100_episodes", config={
+        wandb.init(project="SmartGrids", name="agente_eléctrico", config={
             "gamma": 0.9,
             "lr": 0.00005,
-            "batch_size": 64,
+            "batch_size": 24,
             "hidden_size": 64,
             "num_layers": 2,
             "memory_size": 10000,
