@@ -2,3 +2,4 @@
 /Prediccion/**/*.csv
 /Prediccion/Dataset1/Winsoring/kt_dir/
 /prediccion_produccion/.venv
+/prediccion_produccion/models/prophet_best_5558.pkl
