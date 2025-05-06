@@ -1,3 +1,4 @@
 /Prediccion/*.csv
 /Prediccion/**/*.csv
 /Prediccion/Dataset1/Winsoring/kt_dir/
+/prediccion_produccion/.venv

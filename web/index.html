@@ -1,132 +1,106 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EcoTrack - Inicio</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        .energy-card {
-            transition: all 0.3s ease;
-        }
-        .energy-card:hover {
-            transform: translateY(-5px);
-        }
-        .progress-ring__circle {
-            transition: stroke-dashoffset 0.5s;
-            transform: rotate(-90deg);
-            transform-origin: 50% 50%;
-        }
-        .tab-active {
-            position: relative;
-            color: #4F46E5;
-        }
-        .tab-active:after {
-            content: '';
-            position: absolute;
-            bottom: -8px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 24px;
-            height: 3px;
-            background: #4F46E5;
-            border-radius: 3px;
-        }
-        
-        /* Fix para el responsive */
-        html {
-            -webkit-text-size-adjust: 100%;
-            -webkit-tap-highlight-color: transparent;
-        }
-        body {
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-        main {
-            flex: 1;
-            padding-bottom: 80px; /* Espacio para el nav */
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>EcoTrack - Inicio</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    .energy-card { transition: all 0.3s ease; }
+    .energy-card:hover { transform: translateY(-5px); }
+    .progress-ring__circle {
+      transition: stroke-dashoffset 0.5s;
+      transform: rotate(-90deg);
+      transform-origin: 50% 50%;
+    }
+    .tab-active { position: relative; color: #4F46E5; }
+    .tab-active:after {
+      content: ''; position: absolute; bottom: -8px; left: 50%;
+      transform: translateX(-50%); width: 24px; height: 3px;
+      background: #4F46E5; border-radius: 3px;
+    }
+    html { -webkit-text-size-adjust:100%; -webkit-tap-highlight-color:transparent; }
+    body { min-height:100vh; display:flex; flex-direction:column; }
+    main { flex:1; padding-bottom:80px; }
+  </style>
 </head>
 <body class="bg-gray-50 font-sans">
-    <!-- Header -->
-    <header class="bg-white p-4 shadow-sm sticky top-0 z-10">
-        <div class="flex justify-between items-center">
-            <div>
-                <h1 class="text-xl font-bold">EcoTrack</h1>
-                <p class="text-xs text-gray-500">Gestión energética inteligente</p>
-            </div>
-            <div class="flex space-x-3">
-                <button class="text-gray-600">
-                    <i class="fas fa-bell"></i>
-                </button>
-                <div class="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center">
-                    <i class="fas fa-user text-indigo-500"></i>
-                </div>
-            </div>
-        </div>
-    </header>
 
-    <!-- Main Content -->
-    <main class="p-4">
-        <!-- Welcome Banner -->
-        <div class="bg-gradient-to-r from-indigo-500 to-blue-600 rounded-xl p-4 text-white mb-6">
-            <div class="flex justify-between items-start">
-                <div>
-                    <h2 class="font-bold text-lg mb-1">¡Bienvenido de nuevo!</h2>
-                    <p class="text-sm opacity-90">Tu consumo hoy ha sido eficiente</p>
-                </div>
-                <div class="w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
-                    <i class="fas fa-leaf text-xl"></i>
-                </div>
-            </div>
-            <div class="mt-4 flex justify-between items-center">
-                <div>
-                    <p class="text-xs opacity-80">Puntos Eco</p>
-                    <p class="font-bold">1,245</p>
-                </div>
-                <button class="text-xs bg-white text-indigo-600 px-3 py-1 rounded-full font-medium">
-                    Canjear
-                </button>
-            </div>
+  <!-- Header -->
+  <header class="bg-white p-4 shadow-sm sticky top-0 z-10">
+    <div class="flex justify-between items-center">
+      <div>
+        <h1 class="text-xl font-bold">EcoTrack</h1>
+        <p class="text-xs text-gray-500">Gestión energética inteligente</p>
+      </div>
+      <div class="flex space-x-3">
+        <button class="text-gray-600"><i class="fas fa-bell"></i></button>
+        <div class="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center">
+          <i class="fas fa-user text-indigo-500"></i>
         </div>
+      </div>
+    </div>
+  </header>
 
-        <!-- Energy Summary -->
-        <div class="grid grid-cols-2 gap-4 mb-6">
-            <div class="energy-card bg-white p-4 rounded-xl shadow-sm">
-                <div class="flex justify-between items-start mb-2">
-                    <div>
-                        <p class="text-xs text-gray-500">Consumo hoy</p>
-                        <p class="font-bold">12.4 kWh</p>
-                    </div>
-                    <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                        <i class="fas fa-bolt text-blue-500 text-xs"></i>
-                    </div>
-                </div>
-                <div class="w-full bg-gray-200 rounded-full h-1.5">
-                    <div class="bg-blue-500 h-1.5 rounded-full" style="width: 65%"></div>
-                </div>
-                <p class="text-xs text-gray-500 mt-1">5% menos que ayer</p>
-            </div>
-            
-            <div class="energy-card bg-white p-4 rounded-xl shadow-sm">
-                <div class="flex justify-between items-start mb-2">
-                    <div>
-                        <p class="text-xs text-gray-500">Ahorro mensual</p>
-                        <p class="font-bold">$1,240</p>
-                    </div>
-                    <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                        <i class="fas fa-piggy-bank text-green-500 text-xs"></i>
-                    </div>
-                </div>
-                <div class="w-full bg-gray-200 rounded-full h-1.5">
-                    <div class="bg-green-500 h-1.5 rounded-full" style="width: 82%"></div>
-                </div>
-                <p class="text-xs text-gray-500 mt-1">15% más que el mes pasado</p>
-            </div>
+  <!-- Main Content -->
+  <main class="p-4">
+
+    <!-- Welcome Banner -->
+    <div class="bg-gradient-to-r from-indigo-500 to-blue-600 rounded-xl p-4 text-white mb-6">
+      <div class="flex justify-between items-start">
+        <div>
+          <h2 class="font-bold text-lg mb-1">¡Bienvenido de nuevo!</h2>
+          <p class="text-sm opacity-90">Tu consumo hoy ha sido eficiente</p>
         </div>
+        <div class="w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+          <i class="fas fa-leaf text-xl"></i>
+        </div>
+      </div>
+      <div class="mt-4 flex justify-between items-center">
+        <div>
+          <p class="text-xs opacity-80">Puntos Eco</p>
+          <p class="font-bold">1,245</p>
+        </div>
+        <button class="text-xs bg-white text-indigo-600 px-3 py-1 rounded-full font-medium">Canjear</button>
+      </div>
+    </div>
+
+    <!-- Energy Summary -->
+    <div class="grid grid-cols-2 gap-4 mb-6">
+      <div class="energy-card bg-white p-4 rounded-xl shadow-sm">
+        <div class="flex justify-between items-start mb-2">
+          <div>
+            <p class="text-xs text-gray-500">Consumo hoy</p>
+            <!-- Aquí se inyecta el valor -->
+            <p id="consumo-value" class="font-bold">— kWh</p>
+          </div>
+          <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+            <i class="fas fa-bolt text-blue-500 text-xs"></i>
+          </div>
+        </div>
+        <div class="w-full bg-gray-200 rounded-full h-1.5">
+          <div id="consumo-bar" class="bg-blue-500 h-1.5 rounded-full" style="width: 0%"></div>
+        </div>
+        <p id="consumo-diff" class="text-xs text-gray-500 mt-1">—</p>
+      </div>
+
+      <div class="energy-card bg-white p-4 rounded-xl shadow-sm">
+        <div class="flex justify-between items-start mb-2">
+          <div>
+            <p class="text-xs text-gray-500">Ahorro mensual</p>
+            <p class="font-bold">$1,240</p>
+          </div>
+          <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+            <i class="fas fa-piggy-bank text-green-500 text-xs"></i>
+          </div>
+        </div>
+        <div class="w-full bg-gray-200 rounded-full h-1.5">
+          <div class="bg-green-500 h-1.5 rounded-full" style="width: 82%"></div>
+        </div>
+        <p class="text-xs text-gray-500 mt-1">15% más que el mes pasado</p>
+      </div>
+    </div>
 
         <!-- Energy Distribution -->
         <div class="bg-white rounded-xl shadow-sm p-4 mb-6">
@@ -136,7 +110,7 @@
                     <i class="fas fa-sliders-h mr-1"></i> Ajustar
                 </button>
             </div>
-            
+
             <div class="flex justify-center mb-4">
                 <svg width="160" height="160" viewBox="0 0 36 36">
                     <path
@@ -192,7 +166,7 @@
                     />
                 </svg>
             </div>
-            
+
             <div class="space-y-2">
                 <div class="flex items-center justify-between">
                     <div class="flex items-center">
@@ -201,7 +175,7 @@
                     </div>
                     <span class="text-xs font-medium">40%</span>
                 </div>
-                
+
                 <div class="flex items-center justify-between">
                     <div class="flex items-center">
                         <div class="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
@@ -209,7 +183,7 @@
                     </div>
                     <span class="text-xs font-medium">30%</span>
                 </div>
-                
+
                 <div class="flex items-center justify-between">
                     <div class="flex items-center">
                         <div class="w-3 h-3 bg-amber-500 rounded-full mr-2"></div>
@@ -217,7 +191,7 @@
                     </div>
                     <span class="text-xs font-medium">20%</span>
                 </div>
-                
+
                 <div class="flex items-center justify-between">
                     <div class="flex items-center">
                         <div class="w-3 h-3 bg-red-500 rounded-full mr-2"></div>
@@ -238,21 +212,21 @@
                     </div>
                     <span class="text-xs">Optimizar</span>
                 </button>
-                
+
                 <button class="flex flex-col items-center p-2 bg-white rounded-lg shadow-sm">
                     <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mb-1">
                         <i class="fas fa-robot text-blue-500"></i>
                     </div>
                     <span class="text-xs">Automatizar</span>
                 </button>
-                
+
                 <button class="flex flex-col items-center p-2 bg-white rounded-lg shadow-sm">
                     <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mb-1">
                         <i class="fas fa-chart-line text-green-500"></i>
                     </div>
                     <span class="text-xs">Estadísticas</span>
                 </button>
-                
+
                 <button class="flex flex-col items-center p-2 bg-white rounded-lg shadow-sm">
                     <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center mb-1">
                         <i class="fas fa-cog text-purple-500"></i>
@@ -270,7 +244,7 @@
                     <i class="fas fa-sync-alt mr-1"></i> Actualizar
                 </button>
             </div>
-            
+
             <div class="space-y-3">
                 <div class="flex items-start">
                     <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-3 mt-1">
@@ -281,7 +255,7 @@
                         <p class="text-xs text-gray-500">Reducir 1°C puede ahorrar hasta un 5% de energía</p>
                     </div>
                 </div>
-                
+
                 <div class="flex items-start">
                     <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center mr-3 mt-1">
                         <i class="fas fa-lightbulb text-green-500 text-xs"></i>
@@ -291,7 +265,7 @@
                         <p class="text-xs text-gray-500">Consumen un 85% menos que las bombillas tradicionales</p>
                     </div>
                 </div>
-                
+
                 <div class="flex items-start">
                     <div class="w-8 h-8 bg-amber-100 rounded-full flex items-center justify-center mr-3 mt-1">
                         <i class="fas fa-plug text-amber-500 text-xs"></i>
@@ -305,62 +279,54 @@
         </div>
     </main>
 
-    <!-- Bottom Navigation -->
-    <nav class="bg-white py-2 px-6 flex justify-around fixed bottom-0 w-full border-t border-gray-200 z-10">
-        <a href="index.html" class="p-2 text-indigo-600 tab-active">
-            <i class="fas fa-home text-xl"></i>
-        </a>
-        <a href="stats.html" class="p-2 text-gray-500">
-            <i class="fas fa-chart-line text-xl"></i>
-        </a>
-        <a href="management.html" class="p-2 text-gray-500">
-            <i class="fas fa-bolt text-xl"></i>
-        </a>
-        <a href="settings.html" class="p-2 text-gray-500">
-            <i class="fas fa-cog text-xl"></i>
-        </a>
-    </nav>
+ <!-- Bottom Navigation -->
+  <nav class="bg-white py-2 px-6 flex justify-around fixed bottom-0 w-full border-t border-gray-200 z-10">
+    <a href="index.html" class="p-2 text-indigo-600 tab-active"><i class="fas fa-home text-xl"></i></a>
+    <a href="stats.html"           class="p-2 text-gray-500"><i class="fas fa-chart-line text-xl"></i></a>
+    <a href="management.html"           class="p-2 text-gray-500"><i class="fas fa-bolt text-xl"></i></a>
+    <a href="settings.html"           class="p-2 text-gray-500"><i class="fas fa-cog text-xl"></i></a>
+  </nav>
 
-    <script>
-        // Animación para las tarjetas de energía
-        document.querySelectorAll('.energy-card').forEach(card => {
-            card.addEventListener('mouseenter', () => {
-                card.classList.add('shadow-md');
-            });
-            
-            card.addEventListener('mouseleave', () => {
-                card.classList.remove('shadow-md');
-            });
-        });
+<script>
+/**
+ * rnd(min, max, decimals = 1)
+ * Devuelve un número aleatorio en [min, max] con 'decimals' decimales.
+ */
+function rnd(min, max, decimals = 1) {
+  const factor = 10 ** decimals;
+  return Math.round((Math.random() * (max - min) + min) * factor) / factor;
+}
 
-        // Fix para el responsive al navegar
-        document.addEventListener('DOMContentLoaded', () => {
-            // Forzar recálculo del viewport en iOS
-            if (navigator.userAgent.match(/iPhone|iPad|iPod/i)) {
-                document.body.style.zoom = 'reset';
-                setTimeout(() => {
-                    document.body.style.zoom = '';
-                }, 10);
-            }
-            
-            // Resetear el viewport
-            const viewport = document.querySelector('meta[name="viewport"]');
-            if (viewport) {
-                viewport.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no';
-                setTimeout(() => {
-                    viewport.content = 'width=device-width, initial-scale=1.0';
-                }, 100);
-            }
-        });
-        
-        // Prevenir comportamiento por defecto en los enlaces
-        document.querySelectorAll('nav a').forEach(link => {
-            link.addEventListener('click', (e) => {
-                if (link.getAttribute('href') === '#') {
-                    e.preventDefault();
-                }
-            });
-        });
-    </script>
+document.addEventListener("DOMContentLoaded", () => {
+  const today = new Date().toISOString().slice(0, 10);
+
+  const payload = [{
+    ds: "2021-02-06",
+    irradiancia_W_m2: rnd(400, 900),
+    temperatura      : rnd(15, 35),
+    nubosidad        : rnd(0, 75, 0),
+    lag1             : rnd(0.6, 1.8, 2),
+    lag7             : rnd(0.6, 1.8, 2)
+  }];
+
+  /* ---------- PETICIÓN AL ENDPOINT ---------- */
+  fetch("/predict", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  })
+  .then(r => r.ok ? r.json() : Promise.reject(r))
+  .then(data => {
+    const kwh = data[0].prod_placa;
+    document.getElementById("consumo-value").textContent = kwh.toFixed(2) + " kWh";
+    document.getElementById("consumo-bar").style.width = Math.min(100, kwh / 2.5 * 100) + "%";
+    document.getElementById("consumo-diff").textContent = rnd(-5, 5, 1) + "% respecto a ayer";
+  })
+  .catch(async err => {
+    console.error("fetch /predict:", err);
+    document.getElementById("consumo-value").textContent = "¡Error!";
+  });
+});
+</script>
 </body>
 </html>

@@ -50,7 +50,7 @@
                     <i class="fas fa-bars"></i>
                 </button>
             </div>
-            
+
             <div class="mt-16 mb-20 text-center">
                 <h2 class="text-4xl md:text-5xl font-bold mb-6">Smart Energy Decisions Made Simple</h2>
                 <p class="text-xl md:text-2xl opacity-90 max-w-3xl mx-auto">
@@ -73,7 +73,7 @@
         <!-- Dashboard Section -->
         <section class="mb-20">
             <h2 class="text-3xl font-bold text-center mb-12">Your Energy Dashboard</h2>
-            
+
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
                 <!-- Current Status Card -->
                 <div class="bg-white rounded-xl shadow-md p-6 card-hover transition">
@@ -108,33 +108,35 @@
                         Execute Recommendation
                     </button>
                 </div>
-                
-                <!-- Solar Production Card -->
-                <div class="bg-white rounded-xl shadow-md p-6 card-hover transition">
-                    <div class="flex items-center mb-4">
-                        <div class="bg-yellow-100 p-3 rounded-full mr-4">
-                            <i class="fas fa-solar-panel text-yellow-600 text-xl"></i>
-                        </div>
-                        <h3 class="text-xl font-semibold">Solar Production</h3>
-                    </div>
-                    <div class="mb-4">
-                        <p class="text-gray-500">Today's Forecast</p>
-                        <div class="flex items-end mt-2">
-                            <p class="text-2xl font-bold mr-2">8.2 kWh</p>
-                            <p class="text-green-600 font-medium"><i class="fas fa-arrow-up mr-1"></i>15%</p>
-                        </div>
-                        <p class="text-sm text-gray-500">Compared to yesterday</p>
-                    </div>
-                    <div class="chart-container">
-                        <canvas id="solarChart"></canvas>
-                    </div>
-                    <div class="text-center mt-4">
-                        <button class="text-blue-600 font-medium hover:text-blue-800 transition">
-                            View Detailed Forecast <i class="fas fa-chevron-right ml-1"></i>
-                        </button>
-                    </div>
+
+                <!-- —— Solar Production Card —— -->
+              <div class="bg-white rounded-xl shadow-md p-6 card-hover transition">
+                <div class="flex items-center mb-4">
+                  <div class="bg-yellow-100 p-3 rounded-full mr-4">
+                    <i class="fas fa-solar-panel text-yellow-600 text-xl"></i>
+                  </div>
+                  <h3 class="text-xl font-semibold">Solar Production</h3>
                 </div>
-                
+                <div class="mb-4">
+                  <p class="text-gray-500">Today's Forecast</p>
+                  <div class="flex items-end mt-2">
+                    <!-- valor dinámico -->
+                    <p id="solarTodayKwh" class="text-2xl font-bold mr-2">-- kWh</p>
+                    <!-- % dinámico -->
+                    <p id="solarTodayDiff" class="text-green-600 font-medium"><i class="fas fa-arrow-up mr-1"></i>--%</p>
+                  </div>
+                  <p class="text-sm text-gray-500">Compared to yesterday</p>
+                </div>
+                <div class="chart-container">
+                  <canvas id="solarChart"></canvas>
+                </div>
+                <div class="text-center mt-4">
+                  <button class="text-blue-600 font-medium hover:text-blue-800 transition">
+                    View Detailed Forecast <i class="fas fa-chevron-right ml-1"></i>
+                  </button>
+                </div>
+              </div>
+
                 <!-- Savings Overview Card -->
                 <div class="bg-white rounded-xl shadow-md p-6 card-hover transition">
                     <div class="flex items-center mb-4">
@@ -174,7 +176,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <!-- Energy Price Graph -->
             <div class="bg-white rounded-xl shadow-md p-6 mb-8">
                 <div class="flex justify-between items-center mb-6">
@@ -209,11 +211,11 @@
                 </div>
             </div>
         </section>
-        
+
         <!-- How It Works Section -->
         <section class="mb-20">
             <h2 class="text-3xl font-bold text-center mb-12">How EcoPredict AI Works</h2>
-            
+
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <div class="bg-white rounded-xl shadow-md p-8 text-center card-hover transition">
                     <div class="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -224,7 +226,7 @@
                         Our AI analyzes hyper-local weather forecasts to predict solar panel output with 94% accuracy.
                     </p>
                 </div>
-                
+
                 <div class="bg-white rounded-xl shadow-md p-8 text-center card-hover transition">
                     <div class="bg-purple-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
                         <i class="fas fa-chart-bar text-purple-600 text-2xl"></i>
@@ -234,7 +236,7 @@
                         We process real-time energy market data to forecast price fluctuations 12-36 hours in advance.
                     </p>
                 </div>
-                
+
                 <div class="bg-white rounded-xl shadow-md p-8 text-center card-hover transition">
                     <div class="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
                         <i class="fas fa-robot text-green-600 text-2xl"></i>
@@ -246,11 +248,11 @@
                 </div>
             </div>
         </section>
-        
+
         <!-- Testimonials Section -->
         <section class="mb-20">
             <h2 class="text-3xl font-bold text-center mb-12">What Our Users Say</h2>
-            
+
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div class="bg-white rounded-xl shadow-md p-8 card-hover transition">
                     <div class="flex items-center mb-6">
@@ -271,7 +273,7 @@
                         <i class="fas fa-star"></i>
                     </div>
                 </div>
-                
+
                 <div class="bg-white rounded-xl shadow-md p-8 card-hover transition">
                     <div class="flex items-center mb-6">
                         <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="User" class="w-12 h-12 rounded-full mr-4">
@@ -293,7 +295,7 @@
                 </div>
             </div>
         </section>
-        
+
         <!-- CTA Section -->
         <section class="gradient-bg text-white rounded-2xl p-12 text-center">
             <h2 class="text-3xl font-bold mb-6">Ready to Optimize Your Energy?</h2>
@@ -330,7 +332,7 @@
                         <a href="#" class="text-gray-400 hover:text-white transition"><i class="fab fa-instagram"></i></a>
                     </div>
                 </div>
-                
+
                 <div>
                     <h4 class="text-lg font-semibold mb-4">Product</h4>
                     <ul class="space-y-2">
@@ -340,7 +342,7 @@
                         <li><a href="#" class="text-gray-400 hover:text-white transition">Integrations</a></li>
                     </ul>
                 </div>
-                
+
                 <div>
                     <h4 class="text-lg font-semibold mb-4">Resources</h4>
                     <ul class="space-y-2">
@@ -350,7 +352,7 @@
                         <li><a href="#" class="text-gray-400 hover:text-white transition">Support</a></li>
                     </ul>
                 </div>
-                
+
                 <div>
                     <h4 class="text-lg font-semibold mb-4">Company</h4>
                     <ul class="space-y-2">
@@ -361,293 +363,92 @@
                     </ul>
                 </div>
             </div>
-            
+
             <div class="pt-8 border-t border-gray-800 text-center text-gray-400">
                 <p>&copy; 2025 EcoPredict AI. All rights reserved.</p>
             </div>
         </div>
     </footer>
 
-    <script>
-        // Mock CSV data for energy prices and solar production
-        const mockEnergyCsv = `timestamp,price,solar_production,recommendation
-2023-06-01 00:00:00,0.12,0.0,save
-2023-06-01 01:00:00,0.11,0.0,save
-2023-06-01 02:00:00,0.10,0.0,save
-2023-06-01 03:00:00,0.09,0.0,buy
-2023-06-01 04:00:00,0.10,0.0,buy
-2023-06-01 05:00:00,0.12,0.2,buy
-2023-06-01 06:00:00,0.15,1.5,buy
-2023-06-01 07:00:00,0.18,3.2,save
-2023-06-01 08:00:00,0.20,5.1,save
-2023-06-01 09:00:00,0.22,6.8,sell
-2023-06-01 10:00:00,0.23,7.5,sell
-2023-06-01 11:00:00,0.24,8.2,sell
-2023-06-01 12:00:00,0.25,8.5,sell
-2023-06-01 13:00:00,0.24,8.0,sell
-2023-06-01 14:00:00,0.22,7.0,sell
-2023-06-01 15:00:00,0.20,5.8,save
-2023-06-01 16:00:00,0.18,4.2,save
-2023-06-01 17:00:00,0.16,2.5,save
-2023-06-01 18:00:00,0.15,1.0,buy
-2023-06-01 19:00:00,0.14,0.2,buy
-2023-06-01 20:00:00,0.13,0.0,buy
-2023-06-01 21:00:00,0.12,0.0,save
-2023-06-01 22:00:00,0.12,0.0,save
-2023-06-01 23:00:00,0.11,0.0,save`;
+<script>
+/* ------------------------------------------------------------------ */
+/* 1. UTILIDADES                                                      */
+function rnd(min,max,d=1){const f=10**d;return Math.round((Math.random()*(max-min)+min)*f)/f;}
 
-        // Parse the mock CSV data
-        const parsedData = Papa.parse(mockEnergyCsv, { header: true }).data;
-        
-        // Extract data for charts
-        const timestamps = parsedData.map(row => row.timestamp.split(' ')[1].substring(0, 5));
-        const prices = parsedData.map(row => parseFloat(row.price));
-        const solarProduction = parsedData.map(row => parseFloat(row.solar_production));
-        const recommendations = parsedData.map(row => row.recommendation);
+/* 2. OBTENER DATOS DESDE /predict                                     */
+async function fetchSolarForecast(){
+  const payload=[], base=new Date();
+  for(let h=0;h<24;h++){
+    const ds=new Date(base.getFullYear(),base.getMonth(),base.getDate(),h);
+    payload.push({
+      ds: ds.toISOString().slice(0,19).replace('T',' '),
+      irradiancia_W_m2: rnd(400,900,0),
+      temperatura: rnd(15,35,1),
+      nubosidad: rnd(0,80,0),
+      lag1: rnd(0.6,1.8,2),
+      lag7: rnd(0.6,1.8,2)
+    });
+  }
+  const res=await fetch("/predict",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});
+  if(!res.ok) throw new Error("Error /predict "+res.status);
+  const data=await res.json();
+  return data.map(d=>Number(d.prod_placa.toFixed(2)));
+}
 
-        // Create solar production chart
-        const solarCtx = document.getElementById('solarChart').getContext('2d');
-        const solarChart = new Chart(solarCtx, {
-            type: 'line',
-            data: {
-                labels: timestamps,
-                datasets: [{
-                    label: 'Solar Production (kWh)',
-                    data: solarProduction,
-                    backgroundColor: 'rgba(234, 179, 8, 0.2)',
-                    borderColor: 'rgba(234, 179, 8, 1)',
-                    borderWidth: 2,
-                    tension: 0.3,
-                    fill: true
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: false
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                return `Production: ${context.parsed.y} kWh`;
-                            }
-                        }
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        title: {
-                            display: true,
-                            text: 'kWh'
-                        }
-                    },
-                    x: {
-                        grid: {
-                            display: false
-                        }
-                    }
-                }
-            }
-        });
+/* 3. MOCK PRECIOS                                                     */
+function mockPrices(){
+  const p=[],r=[];
+  for(let h=0;h<24;h++){
+    const v=rnd(0.10,0.25,2);
+    p.push(v); r.push(v<0.13?"buy":v>0.22?"sell":"save");
+  }
+  return {prices:p,recs:r};
+}
 
-        // Create energy price chart
-        const energyCtx = document.getElementById('energyChart').getContext('2d');
-        const energyChart = new Chart(energyCtx, {
-            type: 'bar',
-            data: {
-                labels: timestamps,
-                datasets: [{
-                    label: 'Energy Price ($/kWh)',
-                    data: prices,
-                    backgroundColor: recommendations.map(rec => {
-                        return rec === 'buy' ? 'rgba(59, 130, 246, 0.7)' : 
-                               rec === 'sell' ? 'rgba(16, 185, 129, 0.7)' : 
-                               'rgba(156, 163, 175, 0.7)';
-                    }),
-                    borderColor: 'rgba(59, 130, 246, 1)',
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: false
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                return `Price: $${context.parsed.y}/kWh`;
-                            },
-                            afterLabel: function(context) {
-                                return `Recommendation: ${recommendations[context.dataIndex].toUpperCase()}`;
-                            }
-                        }
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        title: {
-                            display: true,
-                            text: '$/kWh'
-                        }
-                    },
-                    x: {
-                        grid: {
-                            display: false
-                        }
-                    }
-                }
-            }
-        });
+/* 4. GRÁFICOS                                                         */
+function buildCharts(labels, solar, prices, recs){
+  new Chart(document.getElementById('solarChart').getContext('2d'),{
+    type:'line',
+    data:{labels,datasets:[{label:'Solar (kWh)',data:solar,backgroundColor:'rgba(234,179,8,.2)',borderColor:'rgba(234,179,8,1)',borderWidth:2,tension:.3,fill:true}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}
+  });
+  new Chart(document.getElementById('energyChart').getContext('2d'),{
+    type:'bar',
+    data:{labels,datasets:[{label:'Price $/kWh',data:prices,backgroundColor:recs.map(r=>r==="buy"?"rgba(59,130,246,.7)":r==="sell"?"rgba(16,185,129,.7)":"rgba(156,163,175,.7)"),borderWidth:1}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}
+  });
+  new Chart(document.getElementById('historicalChart').getContext('2d'),{
+    type:'line',
+    data:{labels,datasets:[
+      {label:'Price $/kWh',data:prices,borderColor:'rgba(59,130,246,1)',backgroundColor:'rgba(59,130,246,.1)',borderWidth:2,tension:.3,yAxisID:'y'},
+      {label:'Solar kWh',  data:solar, borderColor:'rgba(234,179,8,1)',backgroundColor:'rgba(234,179,8,.1)',borderWidth:2,tension:.3,yAxisID:'y1'}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
+      scales:{y:{title:{display:true,text:'$/kWh'}},y1:{position:'right',grid:{drawOnChartArea:false},title:{display:true,text:'kWh'}}}}
+  });
+}
 
-        // Create historical data chart (line chart)
-        const historicalCtx = document.getElementById('historicalChart').getContext('2d');
-        const historicalChart = new Chart(historicalCtx, {
-            type: 'line',
-            data: {
-                labels: timestamps,
-                datasets: [
-                    {
-                        label: 'Energy Price ($/kWh)',
-                        data: prices,
-                        borderColor: 'rgba(59, 130, 246, 1)',
-                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                        borderWidth: 2,
-                        yAxisID: 'y',
-                        tension: 0.3
-                    },
-                    {
-                        label: 'Solar Production (kWh)',
-                        data: solarProduction,
-                        borderColor: 'rgba(234, 179, 8, 1)',
-                        backgroundColor: 'rgba(234, 179, 8, 0.1)',
-                        borderWidth: 2,
-                        yAxisID: 'y1',
-                        tension: 0.3
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                interaction: {
-                    mode: 'index',
-                    intersect: false,
-                },
-                plugins: {
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                let label = context.dataset.label || '';
-                                if (label) {
-                                    label += ': ';
-                                }
-                                if (context.parsed.y !== null) {
-                                    label += context.datasetIndex === 0 ? 
-                                        `$${context.parsed.y}` : 
-                                        `${context.parsed.y} kWh`;
-                                }
-                                return label;
-                            }
-                        }
-                    }
-                },
-                scales: {
-                    y: {
-                        type: 'linear',
-                        display: true,
-                        position: 'left',
-                        title: {
-                            display: true,
-                            text: 'Price ($/kWh)'
-                        }
-                    },
-                    y1: {
-                        type: 'linear',
-                        display: true,
-                        position: 'right',
-                        title: {
-                            display: true,
-                            text: 'Production (kWh)'
-                        },
-                        grid: {
-                            drawOnChartArea: false
-                        }
-                    }
-                }
-            }
-        });
+/* 5. INICIALIZACIÓN                                                   */
+document.addEventListener('DOMContentLoaded',async ()=>{
+  try{
+    const [solarData,{prices,recs}] = await Promise.all([fetchSolarForecast(),Promise.resolve(mockPrices())]);
+    const labels=[...Array(24).keys()].map(h=>String(h).padStart(2,'0')+":00");
+    buildCharts(labels, solarData, prices, recs);
 
-        // Time period buttons functionality
-        document.getElementById('todayBtn').addEventListener('click', function() {
-            // In a real app, this would fetch new data for today
-            alert("Showing data for today. In a real app, this would fetch new data.");
-        });
+    /* 6. ACTUALIZAR CARD «Solar Production» */
+    const todayTotal = solarData.reduce((a,b)=>a+b,0).toFixed(1);
+    document.getElementById('solarTodayKwh').textContent = `${todayTotal} kWh`;
+    const diffPct = rnd(-20,20,0);
+    const diffEl  = document.getElementById('solarTodayDiff');
+    diffEl.innerHTML = `${diffPct>=0?'<i class="fas fa-arrow-up mr-1"></i>':'<i class="fas fa-arrow-down mr-1"></i>'}${Math.abs(diffPct)}%`;
+    diffEl.classList.toggle('text-green-600', diffPct>=0);
+    diffEl.classList.toggle('text-red-600',   diffPct<0);
 
-        document.getElementById('weekBtn').addEventListener('click', function() {
-            alert("Showing data for this week. In a real app, this would fetch new data.");
-        });
-
-        document.getElementById('monthBtn').addEventListener('click', function() {
-            alert("Showing data for this month. In a real app, this would fetch new data.");
-        });
-
-        // CSV import/export functionality
-        document.getElementById('importCsvBtn').addEventListener('click', function() {
-            document.getElementById('csvFileInput').click();
-        });
-
-        document.getElementById('csvFileInput').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                Papa.parse(file, {
-                    header: true,
-                    complete: function(results) {
-                        alert(`Successfully imported ${results.data.length} records from CSV`);
-                        // In a real app, you would update the charts with the new data
-                    },
-                    error: function(error) {
-                        alert("Error parsing CSV file: " + error.message);
-                    }
-                });
-            }
-        });
-
-        document.getElementById('exportCsvBtn').addEventListener('click', function() {
-            // Create CSV from current data
-            const csv = Papa.unparse({
-                fields: ["timestamp", "price", "solar_production", "recommendation"],
-                data: parsedData
-            });
-            
-            // Create download link
-            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.setAttribute('href', url);
-            link.setAttribute('download', 'energy_data_export.csv');
-            link.style.visibility = 'hidden';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        });
-
-        // Simple demo functionality
-        document.addEventListener('DOMContentLoaded', function() {
-            // Simulate loading data
-            setTimeout(() => {
-                const recommendationCard = document.querySelector('.pulse-animation');
-                if (recommendationCard) {
-                    recommendationCard.classList.remove('pulse-animation');
-                }
-            }, 3000);
-        });
-    </script>
+  }catch(err){
+    console.error(err);
+    alert("No se pudieron cargar los datos de la API. Revisa la consola 📋");
+  }
+});
+</script>
 </body>
 </html>
