@@ -1,27 +1,32 @@
 # ────────────────────────────────────────────────────────────────────────
 # prediccion_produccion/app.py
-# FastAPI + Prophet: API de predicción y servidor de archivos estáticos
+# FastAPI + Prophet: API de predicción de producción y consumo,
+# y servidor de archivos estáticos
 # ────────────────────────────────────────────────────────────────────────
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from typing import List
-import pandas as pd, numpy as np, joblib, json, pathlib
+import pandas as pd
+import numpy as np
+import joblib
+import json
+import pathlib
 
 # ─── paths ──────────────────────────────────────────────────────────────
 ROOT = pathlib.Path(__file__).parent            # …/prediccion_produccion
-WEB = ROOT.parent / "web"
-
-MODEL_PATH  = ROOT / "models/prophet_best_5558.pkl"
-PARAMS_PATH = ROOT / "models/prophet_best_5558_params.json"
+WEB  = ROOT.parent / "web"                      # …/web
+MODEL_PROD_PATH   = ROOT / "models/prophet_best_5558.pkl"
+PARAMS_PROD_PATH  = ROOT / "models/prophet_best_5558_params.json"
+MODEL_CONS_PATH   = ROOT / "models/modelo_prophet_consumo.pkl"
 
 # ─── FastAPI & CORS ─────────────────────────────────────────────────────
-app = FastAPI(title="EcoTrackAPI", version="0.1.0")
+app = FastAPI(title="EcoTrack API", version="0.2.0")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],        # ← restringe en producción
+    allow_origins=["*"],        # ← restringe en producción
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -38,47 +43,84 @@ class PredictItem(BaseModel):
 
 class PredictOut(BaseModel):
     ds: str
-    yhat: float
-    yhat_lower: float
-    yhat_upper: float
     prod_placa: float
 
-# ─── Carga del modelo ───────────────────────────────────────────────────
-model = joblib.load(MODEL_PATH)
-with open(PARAMS_PATH) as f:
-    best_params = json.load(f)
+class ConsumoItem(BaseModel):
+    ds: str
+    temperatura: float
+    coste_euros: float
+    velmedia: float
+    sol: float
+    racha: float
+    prec_log: float
+    y_lag_1: float
+    y_lag_2: float
+    y_lag_24: float
+    y_lag_48: float
+    y_lag_72: float
+    y_lag_168: float
+    coste_euros_lag_1: float
+    coste_euros_lag_2: float
+    coste_euros_lag_24: float
+    coste_euros_lag_48: float
+    y_moving_avg_3: float
+    y_moving_avg_6: float
+    y_moving_avg_24: float
+    week_avg: float
+    trend_diff: float
+    coste_euros_moving_avg_3: float
+    coste_euros_moving_avg_6: float
+    coste_euros_moving_avg_24: float
 
-# ─── POST /predict ──────────────────────────────────────────────────────
-@app.post("/predict", response_model=List[PredictOut])
-async def predict(items: List[PredictItem]):
-    """
-    Devuelve la predicción de producción (kWh) para cada fila recibida.
-    """
-    # 1. dataframe
+class ConsumoOut(BaseModel):
+    ds: str
+    cons_kwh: float
+
+# ─── Carga de modelos ───────────────────────────────────────────────────
+prod_model = joblib.load(MODEL_PROD_PATH)
+with open(PARAMS_PROD_PATH) as f:
+    prod_params = json.load(f)
+
+cons_model = joblib.load(MODEL_CONS_PATH)
+
+# ─── POST /predict (producción) ────────────────────────────────────────
+@app.post("/api/predict", response_model=List[PredictOut])
+async def predict_produccion(items: List[PredictItem]):
     df = pd.DataFrame([i.dict() for i in items])
     df["ds"] = pd.to_datetime(df["ds"])
-
-    # 2. predicción
     try:
-        fcst = model.predict(df)
+        fcst = prod_model.predict(df)
     except Exception as e:
-        raise HTTPException(500, f"Error en predict(): {e}")
-
-    # 3. formateo de salida
-    out: List[PredictOut] = []
+        raise HTTPException(500, f"Error en predict producción: {e}")
+    out = []
     for i, row in df.iterrows():
         y = fcst.loc[i]
+        prod = float(np.expm1(y.yhat))
+        # no puede ser negativo
+        prod = max(prod, 0.0)
         out.append(PredictOut(
-            ds          = row["ds"].strftime("%Y-%m-%d"),
-            yhat        = float(y.yhat),
-            yhat_lower  = float(y.yhat_lower),
-            yhat_upper  = float(y.yhat_upper),
-            prod_placa  = float(np.expm1(y.yhat)),
+                ds = row["ds"].strftime("%Y-%m-%d %H:%M:%S"),
+            prod_placa = prod,
         ))
     return out
 
-# ─── Archivos estáticos (HTML, CSS, JS, imgs…) ─────────────────────────
-#  * html=True hace que si pides "/" entregue index.html automáticamente
-#  * Cualquier otro path (p.ej. /stats.html) busca el archivo del mismo
-#    nombre dentro de la carpeta WEB. Si no existe → 404 clásico.
+# ─── POST /predict-consumo (consumo) ────────────────────────────────────
+@app.post("/api/predict-consumo", response_model=List[ConsumoOut])
+async def predict_consumo(items: List[ConsumoItem]):
+    df = pd.DataFrame([i.dict() for i in items])
+    df["ds"] = pd.to_datetime(df["ds"])
+    try:
+        fcst = cons_model.predict(df)  # Prophet con regresores
+    except Exception as e:
+        raise HTTPException(500, f"Error en predict consumo: {e}")
+    out = []
+    for i, row in df.iterrows():
+        y = fcst.loc[i]
+        out.append(ConsumoOut(
+            ds       = row["ds"].strftime("%Y-%m-%d %H:%M:%S"),
+            cons_kwh = float(y.yhat),
+        ))
+    return out
+
+# ─── Archivos estáticos (HTML, CSS, JS…) ──────────────────────────────
 app.mount("/", StaticFiles(directory=WEB, html=True), name="web")
