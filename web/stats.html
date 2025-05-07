@@ -93,28 +93,28 @@
         <div class="grid grid-cols-2 gap-3 mb-6">
             <div class="stat-card bg-white p-3 rounded-lg shadow-sm">
                 <p class="text-xs text-gray-500">Consumo Total</p>
-                <p class="text-xl font-bold">48.2 <span class="text-sm font-normal">kWh</span></p>
-                <p class="text-xs mt-1 flex items-center">
+                <p id="totalConsumo" class="text-xl font-bold">-- <span class="text-sm font-normal">kWh</span></p>
+                <p id="deltaConsumo" class="text-xs mt-1 flex items-center">
                     <i class="fas fa-arrow-up text-red-500 mr-1"></i>
-                    <span class="text-red-500">8% más</span>
+                    <span class="text-red-500">--%</span>
                 </p>
             </div>
             <div class="stat-card bg-white p-3 rounded-lg shadow-sm">
                 <p class="text-xs text-gray-500">Generación Solar</p>
-                <p class="text-xl font-bold">32.5 <span class="text-sm font-normal">kWh</span></p>
-                <p class="text-xs mt-1 flex items-center">
+                <p id="totalSolar" class="text-xl font-bold">-- <span class="text-sm font-normal">kWh</span></p>
+                <p id="deltaSolar" class="text-xs mt-1 flex items-center">
                     <i class="fas fa-arrow-up text-green-500 mr-1"></i>
-                    <span class="text-green-500">15% más</span>
+                    <span class="text-green-500">--%</span>
                 </p>
             </div>
             <div class="stat-card bg-white p-3 rounded-lg shadow-sm">
                 <p class="text-xs text-gray-500">Ahorro Total</p>
-                <p class="text-xl font-bold">$9.75</p>
+                <p id="totalAhorro" class="text-xl font-bold">--</p>
                 <p class="text-xs mt-1 text-gray-500">vs. periodo anterior</p>
             </div>
             <div class="stat-card bg-white p-3 rounded-lg shadow-sm">
                 <p class="text-xs text-gray-500">Eficiencia</p>
-                <p class="text-xl font-bold">87%</p>
+                <p id="eficiencia" class="text-xl font-bold">--%</p>
                 <p class="text-xs mt-1 text-gray-500">de autosuficiencia</p>
             </div>
         </div>
@@ -152,58 +152,10 @@
                     <i class="fas fa-table mr-1"></i> Ver tabla
                 </button>
             </div>
-            
-            <div class="overflow-x-auto hide-scrollbar">
-                <div class="flex space-x-4" style="width: 150%;">
-                    <div class="text-center">
-                        <p class="text-xs text-gray-500">12 AM</p>
-                        <div class="h-20 w-10 bg-indigo-100 rounded mt-1 relative">
-                            <div class="absolute bottom-0 w-full bg-indigo-500 rounded" style="height: 30%;"></div>
-                        </div>
-                    </div>
-                    <div class="text-center">
-                        <p class="text-xs text-gray-500">3 AM</p>
-                        <div class="h-20 w-10 bg-indigo-100 rounded mt-1 relative">
-                            <div class="absolute bottom-0 w-full bg-indigo-500 rounded" style="height: 25%;"></div>
-                        </div>
-                    </div>
-                    <div class="text-center">
-                        <p class="text-xs text-gray-500">6 AM</p>
-                        <div class="h-20 w-10 bg-indigo-100 rounded mt-1 relative">
-                            <div class="absolute bottom-0 w-full bg-indigo-500 rounded" style="height: 40%;"></div>
-                        </div>
-                    </div>
-                    <div class="text-center">
-                        <p class="text-xs text-gray-500">9 AM</p>
-                        <div class="h-20 w-10 bg-indigo-100 rounded mt-1 relative">
-                            <div class="absolute bottom-0 w-full bg-indigo-500 rounded" style="height: 60%;"></div>
-                        </div>
-                    </div>
-                    <div class="text-center">
-                        <p class="text-xs text-gray-500">12 PM</p>
-                        <div class="h-20 w-10 bg-indigo-100 rounded mt-1 relative">
-                            <div class="absolute bottom-0 w-full bg-indigo-500 rounded" style="height: 75%;"></div>
-                        </div>
-                    </div>
-                    <div class="text-center">
-                        <p class="text-xs text-gray-500">3 PM</p>
-                        <div class="h-20 w-10 bg-indigo-100 rounded mt-1 relative">
-                            <div class="absolute bottom-0 w-full bg-indigo-500 rounded" style="height: 80%;"></div>
-                        </div>
-                    </div>
-                    <div class="text-center">
-                        <p class="text-xs text-gray-500">6 PM</p>
-                        <div class="h-20 w-10 bg-indigo-100 rounded mt-1 relative">
-                            <div class="absolute bottom-0 w-full bg-indigo-500 rounded" style="height: 65%;"></div>
-                        </div>
-                    </div>
-                    <div class="text-center">
-                        <p class="text-xs text-gray-500">9 PM</p>
-                        <div class="h-20 w-10 bg-indigo-100 rounded mt-1 relative">
-                            <div class="absolute bottom-0 w-full bg-indigo-500 rounded" style="height: 45%;"></div>
-                        </div>
-                    </div>
-                </div>
+
+            <div id="hourlyContainer" class="overflow-x-auto hide-scrollbar">
+                <!-- Aquí inyectaremos dinámicamente los bloques horarios -->
+                <div id="hourlyInner" class="flex space-x-4" style="width: 150%;"></div>
             </div>
         </div>
 
@@ -215,7 +167,7 @@
                     <i class="fas fa-sort-amount-down mr-1"></i> Ordenar
                 </button>
             </div>
-            
+
             <div class="space-y-3">
                 <div class="flex items-center">
                     <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-3">
@@ -229,7 +181,7 @@
                     </div>
                     <p class="text-xs text-gray-500 ml-2">12.4 kWh</p>
                 </div>
-                
+
                 <div class="flex items-center">
                     <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center mr-3">
                         <i class="fas fa-lightbulb text-green-500"></i>
@@ -242,7 +194,7 @@
                     </div>
                     <p class="text-xs text-gray-500 ml-2">6.1 kWh</p>
                 </div>
-                
+
                 <div class="flex items-center">
                     <div class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center mr-3">
                         <i class="fas fa-tv text-purple-500"></i>
@@ -255,7 +207,7 @@
                     </div>
                     <p class="text-xs text-gray-500 ml-2">5.0 kWh</p>
                 </div>
-                
+
                 <div class="flex items-center">
                     <div class="w-8 h-8 bg-amber-100 rounded-full flex items-center justify-center mr-3">
                         <i class="fas fa-plug text-amber-500"></i>
@@ -288,190 +240,197 @@
         </a>
     </nav>
 
-    <script>
-        // Datos de ejemplo para los gráficos
-        const energyData = {
-            labels: ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
-            consumption: [12.4, 11.8, 13.2, 14.0, 12.1, 10.5, 9.8],
-            solar: [8.2, 9.1, 8.5, 7.8, 9.4, 10.2, 11.0],
-            grid: [4.2, 2.7, 4.7, 6.2, 2.7, 0.3, -1.2]
-        };
+<script>
+        // rnd(min, max, decimales)
+        function rnd(min, max, d = 1) {
+            const f = 10 ** d;
+            return Math.round((Math.random() * (max - min) + min) * f) / f;
+        }
 
-        // Inicializar gráficos
-        function initCharts() {
-            // Gráfico de energía
-            const energyCtx = document.getElementById('energyChart').getContext('2d');
-            new Chart(energyCtx, {
+        // > POST /predict-consumo
+        async function fetchConsumptionForecast() {
+            const payload = [];
+            const base = new Date(2021,0,1);
+            for (let h = 0; h < 24; h++) {
+                const ds = new Date(base.getFullYear(), base.getMonth(), base.getDate(), h);
+                payload.push({
+                    ds: ds.toISOString().slice(0,19).replace('T',' '),
+                    temperatura: rnd(15,35,1),
+                    coste_euros: rnd(0.10,0.25,3),
+                    velmedia: rnd(0,10,1),
+                    sol: rnd(0,10,1),
+                    racha: rnd(0,15,1),
+                    prec_log: rnd(0,1,2),
+                    y_lag_1: rnd(0.5,2.5,2),
+                    y_lag_2: rnd(0.5,2.5,2),
+                    y_lag_24: rnd(0.5,2.5,2),
+                    y_lag_48: rnd(0.5,2.5,2),
+                    y_lag_72: rnd(0.5,2.5,2),
+                    y_lag_168: rnd(0.5,2.5,2),
+                    coste_euros_lag_1: rnd(0.10,0.25,3),
+                    coste_euros_lag_2: rnd(0.10,0.25,3),
+                    coste_euros_lag_24: rnd(0.10,0.25,3),
+                    coste_euros_lag_48: rnd(0.10,0.25,3),
+                    y_moving_avg_3: rnd(0.5,2.5,2),
+                    y_moving_avg_6: rnd(0.5,2.5,2),
+                    y_moving_avg_24: rnd(0.5,2.5,2),
+                    coste_euros_moving_avg_3: rnd(0.10,0.25,3),
+                    coste_euros_moving_avg_6: rnd(0.10,0.25,3),
+                    coste_euros_moving_avg_24: rnd(0.10,0.25,3),
+                    week_avg: rnd(1,2,2),
+                    trend_diff: rnd(-0.5,0.5,2)
+                });
+            }
+            const res = await fetch('/api/predict-consumo', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            if (!res.ok) throw new Error(`predict-consumo ${res.status}`);
+            return await res.json();  // devuelve [{ds, cons_kwh},...]
+        }
+
+        // > POST /predict (producción)
+        async function fetchProductionForecast() {
+            const payload = [];
+            const base = new Date(2021,0,1);
+            for (let h = 0; h < 24; h++) {
+                const ds = new Date(base.getFullYear(), base.getMonth(), base.getDate(), h);
+                payload.push({
+                    ds: ds.toISOString().slice(0,19).replace('T',' '),
+                    irradiancia_W_m2: rnd(400,900,0),
+                    temperatura: rnd(15,35,1),
+                    nubosidad: rnd(0,80,0),
+                    lag1: rnd(0.6,1.8,2),
+                    lag7: rnd(0.6,1.8,2)
+                });
+            }
+            const res = await fetch('/api/predict', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            if (!res.ok) throw new Error(`predict-producción ${res.status}`);
+            return await res.json();  // devuelve [{ds, prod_placa},...]
+        }
+
+        // Construye el gráfico de balance
+        function buildEnergyChart(ctx, labels, cons, prod) {
+            const grid = labels.map((_,i)=>(cons[i]-prod[i]).toFixed(2));
+            new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels: energyData.labels,
+                    labels,
                     datasets: [
-                        {
-                            label: 'Consumo',
-                            data: energyData.consumption,
-                            backgroundColor: '#4F46E5',
-                            borderRadius: 4
-                        },
-                        {
-                            label: 'Solar',
-                            data: energyData.solar,
-                            backgroundColor: '#F59E0B',
-                            borderRadius: 4
-                        },
-                        {
-                            label: 'Red',
-                            data: energyData.grid,
-                            backgroundColor: '#10B981',
-                            borderRadius: 4
-                        }
+                        { label:'Consumo', data:cons, borderRadius:4 },
+                        { label:'Solar',   data:prod, borderRadius:4 },
+                        { label:'Red',     data:grid, borderRadius:4 }
                     ]
                 },
                 options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'top',
-                            labels: {
-                                usePointStyle: true,
-                                padding: 20
-                            }
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: ctx => `${ctx.dataset.label}: ${ctx.raw} kWh`
-                            }
-                        }
+                    responsive:true,
+                    maintainAspectRatio:false,
+                    plugins:{
+                        legend:{ position:'top', labels:{ usePointStyle:true,padding:20 }},
+                        tooltip:{ callbacks:{ label:ctx=>`${ctx.dataset.label}: ${ctx.raw} kWh` }}
                     },
-                    scales: {
-                        x: {
-                            grid: {
-                                display: false
-                            }
-                        },
-                        y: {
-                            beginAtZero: true,
-                            grid: {
-                                drawBorder: false
-                            },
-                            ticks: {
-                                callback: value => `${value} kWh`
-                            }
-                        }
+                    scales:{
+                        x:{ grid:{ display:false }},
+                        y:{ beginAtZero:true, grid:{ drawBorder:false }, ticks:{ callback:v=>`${v} kWh` }}
                     }
                 }
             });
         }
 
-        // Manejar eventos
-        function setupEventListeners() {
-            // Filtros de tiempo
-            document.getElementById('filterDay').addEventListener('click', () => {
-                updateTimeFilter('filterDay');
-                alert('Mostrando datos del día');
-            });
-            
-            document.getElementById('filterWeek').addEventListener('click', () => {
-                updateTimeFilter('filterWeek');
-                alert('Mostrando datos de la semana');
-            });
-            
-            document.getElementById('filterMonth').addEventListener('click', () => {
-                updateTimeFilter('filterMonth');
-                alert('Mostrando datos del mes');
-            });
-            
-            document.getElementById('filterYear').addEventListener('click', () => {
-                updateTimeFilter('filterYear');
-                alert('Mostrando datos del año');
-            });
-            
-            document.getElementById('filterCustom').addEventListener('click', () => {
-                updateTimeFilter('filterCustom');
-                alert('Selecciona un rango personalizado');
-            });
-
-            // Botón de calendario
-            document.getElementById('calendarBtn').addEventListener('click', () => {
-                alert('Selecciona una fecha específica');
-            });
-
-            // Pestañas
-            document.getElementById('tabEnergy').addEventListener('click', () => {
-                updateTab('tabEnergy');
-            });
-            
-            document.getElementById('tabCosts').addEventListener('click', () => {
-                updateTab('tabCosts');
-                alert('Mostrando gráficos de costos');
-            });
-            
-            document.getElementById('tabEfficiency').addEventListener('click', () => {
-                updateTab('tabEfficiency');
-                alert('Mostrando gráficos de eficiencia');
-            });
-
-            // Botones varios
-            document.getElementById('energyChartZoom').addEventListener('click', () => {
-                alert('Zoom en el gráfico de energía');
-            });
-            
-            document.getElementById('energyChartInfo').addEventListener('click', () => {
-                alert('Información sobre los datos mostrados');
-            });
-            
-            document.getElementById('toggleHourlyView').addEventListener('click', () => {
-                alert('Cambiando a vista de tabla horaria');
-            });
-            
-            document.getElementById('deviceSort').addEventListener('click', () => {
-                alert('Ordenando dispositivos por consumo');
-            });
-            
-            document.getElementById('exportPdf').addEventListener('click', () => {
-                alert('Exportando estadísticas a PDF');
-            });
-            
-            document.getElementById('shareStats').addEventListener('click', () => {
-                alert('Compartiendo estadísticas');
+        // Dibuja bloques horarios
+        function renderHourly(consData) {
+            const c = document.getElementById('hourlyInner');
+            c.innerHTML = '';
+            const maxV = Math.max(...consData.map(x=>x.cons_kwh));
+            consData.forEach(item => {
+                const h = new Date(item.ds).getHours();
+                const pct = Math.round(item.cons_kwh / maxV * 100);
+                const div = document.createElement('div');
+                div.className = 'text-center';
+                div.innerHTML = `
+                    <p class="text-xs text-gray-500">${String(h).padStart(2,'0')} ${h<12?'AM':'PM'}</p>
+                    <div class="h-20 w-10 bg-indigo-100 rounded mt-1 relative">
+                      <div class="absolute bottom-0 w-full bg-indigo-500 rounded" style="height:${pct}%;"></div>
+                    </div>`;
+                c.appendChild(div);
             });
         }
 
-        // Actualizar filtro de tiempo activo
-        function updateTimeFilter(activeId) {
-            const filters = ['filterDay', 'filterWeek', 'filterMonth', 'filterYear', 'filterCustom'];
-            filters.forEach(id => {
-                const btn = document.getElementById(id);
-                if (id === activeId) {
-                    btn.classList.remove('bg-gray-100');
-                    btn.classList.add('bg-indigo-600', 'text-white');
-                } else {
-                    btn.classList.remove('bg-indigo-600', 'text-white');
-                    btn.classList.add('bg-gray-100');
-                }
-            });
-        }
+        // Arranca todo
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const [consArr, prodArr] = await Promise.all([
+                    fetchConsumptionForecast(),
+                    fetchProductionForecast()
+                ]);
+                // extrae valores
+                const consVals = consArr.map(x=>x.cons_kwh);
+                const prodVals = prodArr.map(x=>x.prod_placa);
+                // etiquetas horarias
+                const labels = consArr.map(x=>new Date(x.ds).getHours().toString().padStart(2,'0')+':00');
 
-        // Actualizar pestaña activa
-        function updateTab(activeId) {
-            const tabs = ['tabEnergy', 'tabCosts', 'tabEfficiency'];
-            tabs.forEach(id => {
-                const tab = document.getElementById(id);
-                if (id === activeId) {
-                    tab.classList.add('tab-active');
-                    tab.classList.remove('text-gray-500');
-                } else {
-                    tab.classList.remove('tab-active');
-                    tab.classList.add('text-gray-500');
-                }
-            });
-        }
+                // resumenes
+                const totalC = consVals.reduce((a,b)=>a+b,0).toFixed(1);
+                const totalP = prodVals.reduce((a,b)=>a+b,0).toFixed(1);
+                document.getElementById('totalConsumo').textContent = `${totalC} kWh`;
+                document.getElementById('totalSolar').textContent   = `${totalP} kWh`;
+                document.getElementById('deltaConsumo').innerHTML   = `<i class="fas fa-arrow-up mr-1"></i>${Math.round((totalC-totalP)/totalP*100)}%`;
+                document.getElementById('deltaSolar').innerHTML     = `<i class="fas fa-arrow-up mr-1"></i>${Math.round((totalP-totalC)/totalC*100)}%`;
+                document.getElementById('totalAhorro').textContent   = `$${(totalP*0.15).toFixed(2)}`;
+                document.getElementById('eficiencia').textContent    = `${Math.round(totalP/totalC*100)}%`;
 
-        // Inicializar la aplicación
-        document.addEventListener('DOMContentLoaded', () => {
-            initCharts();
-            setupEventListeners();
+                // hourly
+                renderHourly(consArr);
+
+                // chart
+                const ctx = document.getElementById('energyChart').getContext('2d');
+                buildEnergyChart(ctx, labels, consVals, prodVals);
+
+                // resto de listeners
+                setupEventListeners();
+            } catch (err) {
+                console.error(err);
+                alert('Error cargando datos de tus endpoints');
+            }
         });
+
+        // listeners genéricos
+        function setupEventListeners() {
+            ['filterDay','filterWeek','filterMonth','filterYear','filterCustom'].forEach(id=>
+                document.getElementById(id).addEventListener('click', ()=> updateTimeFilter(id))
+            );
+            document.getElementById('calendarBtn').addEventListener('click', ()=> alert('Selecciona fecha'));
+            ['tabEnergy','tabCosts','tabEfficiency'].forEach(id=>
+                document.getElementById(id).addEventListener('click', ()=> updateTab(id))
+            );
+            document.getElementById('energyChartZoom').addEventListener('click', ()=> alert('Zoom'));
+            document.getElementById('energyChartInfo').addEventListener('click', ()=> alert('Info'));
+            document.getElementById('toggleHourlyView').addEventListener('click', ()=> alert('Tabla horaria'));
+            document.getElementById('deviceSort').addEventListener('click', ()=> alert('Ordenar dispositivos'));
+            document.getElementById('exportPdf').addEventListener('click', ()=> alert('Export PDF'));
+            document.getElementById('shareStats').addEventListener('click', ()=> alert('Compartir'));
+        }
+
+        function updateTimeFilter(activeId) {
+            ['filterDay','filterWeek','filterMonth','filterYear','filterCustom'].forEach(id=>{
+                const btn = document.getElementById(id);
+                if(id===activeId) btn.classList.replace('bg-gray-100','bg-indigo-600'), btn.classList.add('text-white');
+                else              btn.classList.replace('bg-indigo-600','bg-gray-100'), btn.classList.remove('text-white');
+            });
+        }
+
+        function updateTab(activeId) {
+            ['tabEnergy','tabCosts','tabEfficiency'].forEach(id=>{
+                const tab = document.getElementById(id);
+                if(id===activeId) tab.classList.add('tab-active'), tab.classList.remove('text-gray-500');
+                else               tab.classList.remove('tab-active'), tab.classList.add('text-gray-500');
+            });
+        }
     </script>
 </body>
 </html>

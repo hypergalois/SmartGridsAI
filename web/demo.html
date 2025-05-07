@@ -29,6 +29,27 @@
             height: 300px;
             width: 100%;
         }
+        .success-animation {
+            animation: success 1.5s ease-in-out;
+        }
+        @keyframes success {
+            0% { background-color: #3b82f6; }
+            50% { background-color: #10b981; transform: scale(1.05); }
+            100% { background-color: #3b82f6; }
+        }
+        .checkmark {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            transform: scale(0);
+            animation: checkmark 0.5s ease-in-out forwards;
+            animation-delay: 0.5s;
+        }
+        @keyframes checkmark {
+            0% { transform: scale(0); }
+            80% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
     </style>
 </head>
 <body class="bg-gray-50 font-sans">
@@ -74,140 +95,100 @@
         <section class="mb-20">
             <h2 class="text-3xl font-bold text-center mb-12">Your Energy Dashboard</h2>
 
+            <!-- Top Row - Cards -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
                 <!-- Current Status Card -->
-                <div class="bg-white rounded-xl shadow-md p-6 card-hover transition">
+                <div id="card-decision" class="bg-white rounded-xl shadow-md p-6 card-hover transition">
                     <div class="flex items-center mb-4">
                         <div class="bg-blue-100 p-3 rounded-full mr-4">
-                            <i class="fas fa-chart-line text-blue-600 text-xl"></i>
+                            <i class="fas fa-robot text-blue-600 text-xl"></i>
                         </div>
-                        <h3 class="text-xl font-semibold">Current Energy Status</h3>
+                        <h3 class="text-xl font-semibold">AI Recommendation</h3>
                     </div>
-                    <div class="flex justify-between items-center mb-4">
-                        <div>
-                            <p class="text-gray-500">Current Price</p>
-                            <p class="text-2xl font-bold">$0.18/kWh</p>
-                        </div>
-                        <div class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-medium">
-                            <i class="fas fa-arrow-down mr-1"></i> 12% below average
-                        </div>
-                    </div>
-                    <div class="mb-4">
-                        <p class="text-gray-500 mb-2">AI Recommendation</p>
-                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 flex items-center">
-                            <div class="bg-blue-600 text-white p-2 rounded-full mr-3">
-                                <i class="fas fa-bolt"></i>
-                            </div>
-                            <div>
-                                <p class="font-semibold">Buy Energy Now</p>
-                                <p class="text-sm text-gray-600">Prices expected to rise 22% in next 2 hours</p>
-                            </div>
-                        </div>
-                    </div>
-                    <button class="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition">
-                        Execute Recommendation
+                    <p id="recommendationText" class="mb-4 text-gray-700">Loading...</p>
+                    <button id="execRecBtn" class="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition flex items-center justify-center">
+                        <span id="btnText">Execute Recommendation</span>
+                        <span id="checkmark" class="hidden ml-2"><i class="fas fa-check text-white"></i></span>
                     </button>
                 </div>
 
-                <!-- —— Solar Production Card —— -->
-              <div class="bg-white rounded-xl shadow-md p-6 card-hover transition">
-                <div class="flex items-center mb-4">
-                  <div class="bg-yellow-100 p-3 rounded-full mr-4">
-                    <i class="fas fa-solar-panel text-yellow-600 text-xl"></i>
-                  </div>
-                  <h3 class="text-xl font-semibold">Solar Production</h3>
-                </div>
-                <div class="mb-4">
-                  <p class="text-gray-500">Today's Forecast</p>
-                  <div class="flex items-end mt-2">
-                    <!-- valor dinámico -->
-                    <p id="solarTodayKwh" class="text-2xl font-bold mr-2">-- kWh</p>
-                    <!-- % dinámico -->
-                    <p id="solarTodayDiff" class="text-green-600 font-medium"><i class="fas fa-arrow-up mr-1"></i>--%</p>
-                  </div>
-                  <p class="text-sm text-gray-500">Compared to yesterday</p>
-                </div>
-                <div class="chart-container">
-                  <canvas id="solarChart"></canvas>
-                </div>
-                <div class="text-center mt-4">
-                  <button class="text-blue-600 font-medium hover:text-blue-800 transition">
-                    View Detailed Forecast <i class="fas fa-chevron-right ml-1"></i>
-                  </button>
-                </div>
-              </div>
-
-                <!-- Savings Overview Card -->
+                <!-- Solar Production Card -->
                 <div class="bg-white rounded-xl shadow-md p-6 card-hover transition">
                     <div class="flex items-center mb-4">
-                        <div class="bg-green-100 p-3 rounded-full mr-4">
-                            <i class="fas fa-piggy-bank text-green-600 text-xl"></i>
+                        <div class="bg-yellow-100 p-3 rounded-full mr-4">
+                            <i class="fas fa-solar-panel text-yellow-600 text-xl"></i>
                         </div>
-                        <h3 class="text-xl font-semibold">Savings Overview</h3>
+                        <h3 class="text-xl font-semibold">Solar Production</h3>
                     </div>
-                    <div class="grid grid-cols-2 gap-4 mb-6">
-                        <div class="bg-gray-50 p-3 rounded-lg">
-                            <p class="text-gray-500 text-sm">Today's Savings</p>
-                            <p class="text-xl font-bold text-green-600">$3.42</p>
+                    <div class="mb-4">
+                        <p class="text-gray-500">Today's Forecast</p>
+                        <div class="flex items-end mt-2">
+                            <p id="solarTodayKwh" class="text-2xl font-bold mr-2">-- kWh</p>
+                            <p id="solarTodayDiff" class="text-green-600 font-medium"><i class="fas fa-arrow-up mr-1"></i>--%</p>
                         </div>
-                        <div class="bg-gray-50 p-3 rounded-lg">
-                            <p class="text-gray-500 text-sm">This Month</p>
-                            <p class="text-xl font-bold text-green-600">$78.15</p>
-                        </div>
-                        <div class="bg-gray-50 p-3 rounded-lg">
-                            <p class="text-gray-500 text-sm">Last Month</p>
-                            <p class="text-xl font-bold">$65.90</p>
-                        </div>
-                        <div class="bg-gray-50 p-3 rounded-lg">
-                            <p class="text-gray-500 text-sm">Annual Projection</p>
-                            <p class="text-xl font-bold text-green-600">$938.00</p>
-                        </div>
+                        <p class="text-sm text-gray-500">Compared to yesterday</p>
                     </div>
-                    <div class="bg-blue-50 rounded-lg p-3">
-                        <div class="flex items-center">
-                            <div class="bg-blue-100 p-2 rounded-full mr-3">
-                                <i class="fas fa-lightbulb text-blue-600"></i>
-                            </div>
-                            <div>
-                                <p class="font-medium">Tip of the Day</p>
-                                <p class="text-sm text-gray-600">Run your dishwasher after 8PM when energy prices drop by 18%</p>
-                            </div>
+                    <div class="chart-container">
+                        <canvas id="solarChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Consumption Card -->
+                <div class="bg-white rounded-xl shadow-md p-6 card-hover transition">
+                    <div class="flex items-center mb-4">
+                        <div class="bg-red-100 p-3 rounded-full mr-4">
+                            <i class="fas fa-plug text-red-600 text-xl"></i>
                         </div>
+                        <h3 class="text-xl font-semibold">Energy Consumption</h3>
+                    </div>
+                    <div class="mb-4">
+                        <p class="text-gray-500">Today's Forecast</p>
+                        <div class="flex items-end mt-2">
+                            <p id="consTodayKwh" class="text-2xl font-bold mr-2">-- kWh</p>
+                            <p id="consTodayDiff" class="text-red-600 font-medium"><i class="fas fa-arrow-up mr-1"></i>--%</p>
+                        </div>
+                        <p class="text-sm text-gray-500">Compared to yesterday</p>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="consumptionChart"></canvas>
                     </div>
                 </div>
             </div>
 
-            <!-- Energy Price Graph -->
-            <div class="bg-white rounded-xl shadow-md p-6 mb-8">
-                <div class="flex justify-between items-center mb-6">
-                    <h3 class="text-xl font-semibold">Energy Price Forecast</h3>
-                    <div class="flex space-x-2">
-                        <button id="todayBtn" class="px-3 py-1 bg-blue-600 text-white rounded-lg text-sm">Today</button>
-                        <button id="weekBtn" class="px-3 py-1 bg-gray-100 rounded-lg text-sm hover:bg-gray-200">Week</button>
-                        <button id="monthBtn" class="px-3 py-1 bg-gray-100 rounded-lg text-sm hover:bg-gray-200">Month</button>
+            <!-- Bottom Row - Full Width Charts -->
+            <div class="grid grid-cols-1 gap-8">
+                <!-- Energy Price Graph -->
+                <div class="bg-white rounded-xl shadow-md p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-xl font-semibold">Energy Price Forecast</h3>
+                        <div class="flex space-x-2">
+                            <button id="todayBtn" class="px-3 py-1 bg-blue-600 text-white rounded-lg text-sm">Today</button>
+                            <button id="weekBtn" class="px-3 py-1 bg-gray-100 rounded-lg text-sm hover:bg-gray-200">Week</button>
+                            <button id="monthBtn" class="px-3 py-1 bg-gray-100 rounded-lg text-sm hover:bg-gray-200">Month</button>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="energyChart"></canvas>
                     </div>
                 </div>
-                <div class="chart-container">
-                    <canvas id="energyChart"></canvas>
-                </div>
-            </div>
 
-            <!-- Historical Data Section -->
-            <div class="bg-white rounded-xl shadow-md p-6 mb-8">
-                <div class="flex justify-between items-center mb-6">
-                    <h3 class="text-xl font-semibold">Historical Energy Data</h3>
-                    <div>
-                        <button id="importCsvBtn" class="px-3 py-1 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700 mr-2">
-                            <i class="fas fa-file-import mr-1"></i>Import CSV
-                        </button>
-                        <input type="file" id="csvFileInput" accept=".csv" class="hidden">
-                        <button id="exportCsvBtn" class="px-3 py-1 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700">
-                            <i class="fas fa-file-export mr-1"></i>Export CSV
-                        </button>
+                <!-- Historical Data Section -->
+                <div class="bg-white rounded-xl shadow-md p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-xl font-semibold">Historical Energy Data</h3>
+                        <div>
+                            <button id="importCsvBtn" class="px-3 py-1 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700 mr-2">
+                                <i class="fas fa-file-import mr-1"></i>Import CSV
+                            </button>
+                            <input type="file" id="csvFileInput" accept=".csv" class="hidden">
+                            <button id="exportCsvBtn" class="px-3 py-1 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700">
+                                <i class="fas fa-file-export mr-1"></i>Export CSV
+                            </button>
+                        </div>
                     </div>
-                </div>
-                <div class="chart-container">
-                    <canvas id="historicalChart"></canvas>
+                    <div class="chart-container">
+                        <canvas id="historicalChart"></canvas>
+                    </div>
                 </div>
             </div>
         </section>
@@ -370,85 +351,314 @@
         </div>
     </footer>
 
-<script>
-/* ------------------------------------------------------------------ */
-/* 1. UTILIDADES                                                      */
-function rnd(min,max,d=1){const f=10**d;return Math.round((Math.random()*(max-min)+min)*f)/f;}
+    <script>
+        // Utilities
+        function rnd(min, max, d = 1) {
+            const f = 10 ** d;
+            return Math.round((Math.random() * (max - min) + min) * f) / f;
+        }
 
-/* 2. OBTENER DATOS DESDE /predict                                     */
-async function fetchSolarForecast(){
-  const payload=[], base=new Date();
-  for(let h=0;h<24;h++){
-    const ds=new Date(base.getFullYear(),base.getMonth(),base.getDate(),h);
-    payload.push({
-      ds: ds.toISOString().slice(0,19).replace('T',' '),
-      irradiancia_W_m2: rnd(400,900,0),
-      temperatura: rnd(15,35,1),
-      nubosidad: rnd(0,80,0),
-      lag1: rnd(0.6,1.8,2),
-      lag7: rnd(0.6,1.8,2)
-    });
-  }
-  const res=await fetch("/predict",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});
-  if(!res.ok) throw new Error("Error /predict "+res.status);
-  const data=await res.json();
-  return data.map(d=>Number(d.prod_placa.toFixed(2)));
-}
+        // Mock solar forecast
+        async function fetchSolarForecast() {
+            const payload = [], base = new Date(2021, 0, 1);
+            for (let h = 0; h < 24; h++) {
+                const ds = new Date(
+                    base.getFullYear(),
+                    base.getMonth(),
+                    base.getDate(),
+                    h
+                );
+                payload.push({
+                    ds: ds.toISOString().slice(0, 19).replace('T', ' '),
+                    irradiancia_W_m2: rnd(400, 900, 0),
+                    temperatura: rnd(15, 35, 1),
+                    nubosidad: rnd(0, 80, 0),
+                    lag1: rnd(0.6, 1.8, 2),
+                    lag7: rnd(0.6, 1.8, 2)
+                });
+            }
+            // Simulate API call
+            return new Promise(resolve => {
+                setTimeout(() => {
+                    resolve(payload.map(x => rnd(0.5, 5, 2)));
+                }, 500);
+            });
+        }
 
-/* 3. MOCK PRECIOS                                                     */
-function mockPrices(){
-  const p=[],r=[];
-  for(let h=0;h<24;h++){
-    const v=rnd(0.10,0.25,2);
-    p.push(v); r.push(v<0.13?"buy":v>0.22?"sell":"save");
-  }
-  return {prices:p,recs:r};
-}
+        // Mock consumption forecast
+        async function fetchConsumptionForecast() {
+            const payload = [];
+            const base = new Date();
 
-/* 4. GRÁFICOS                                                         */
-function buildCharts(labels, solar, prices, recs){
-  new Chart(document.getElementById('solarChart').getContext('2d'),{
-    type:'line',
-    data:{labels,datasets:[{label:'Solar (kWh)',data:solar,backgroundColor:'rgba(234,179,8,.2)',borderColor:'rgba(234,179,8,1)',borderWidth:2,tension:.3,fill:true}]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}
-  });
-  new Chart(document.getElementById('energyChart').getContext('2d'),{
-    type:'bar',
-    data:{labels,datasets:[{label:'Price $/kWh',data:prices,backgroundColor:recs.map(r=>r==="buy"?"rgba(59,130,246,.7)":r==="sell"?"rgba(16,185,129,.7)":"rgba(156,163,175,.7)"),borderWidth:1}]},
-    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}
-  });
-  new Chart(document.getElementById('historicalChart').getContext('2d'),{
-    type:'line',
-    data:{labels,datasets:[
-      {label:'Price $/kWh',data:prices,borderColor:'rgba(59,130,246,1)',backgroundColor:'rgba(59,130,246,.1)',borderWidth:2,tension:.3,yAxisID:'y'},
-      {label:'Solar kWh',  data:solar, borderColor:'rgba(234,179,8,1)',backgroundColor:'rgba(234,179,8,.1)',borderWidth:2,tension:.3,yAxisID:'y1'}
-    ]},
-    options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
-      scales:{y:{title:{display:true,text:'$/kWh'}},y1:{position:'right',grid:{drawOnChartArea:false},title:{display:true,text:'kWh'}}}}
-  });
-}
+            for (let h = 0; h < 24; h++) {
+                const ds = new Date(base.getFullYear(), base.getMonth(), base.getDate(), h);
+                payload.push({
+                    ds: ds.toISOString().slice(0, 19).replace('T', ' '),
+                    temperatura: rnd(15, 35, 1),
+                    coste_euros: rnd(0.10, 0.25, 3),
+                    velmedia: rnd(0, 10, 1),
+                    sol: rnd(0, 10, 1),
+                    racha: rnd(0, 15, 1),
+                    prec_log: rnd(0, 1, 2),
+                    y_lag_1: rnd(0.5, 2.5, 2),
+                    y_lag_2: rnd(0.5, 2.5, 2),
+                    y_lag_24: rnd(0.5, 2.5, 2),
+                    y_lag_48: rnd(0.5, 2.5, 2),
+                    y_lag_72: rnd(0.5, 2.5, 2),
+                    y_lag_168: rnd(0.5, 2.5, 2),
+                    coste_euros_lag_1: rnd(0.10, 0.25, 3),
+                    coste_euros_lag_2: rnd(0.10, 0.25, 3),
+                    coste_euros_lag_24: rnd(0.10, 0.25, 3),
+                    coste_euros_lag_48: rnd(0.10, 0.25, 3),
+                    y_moving_avg_3: rnd(0.5, 2.5, 2),
+                    y_moving_avg_6: rnd(0.5, 2.5, 2),
+                    y_moving_avg_24: rnd(0.5, 2.5, 2),
+                    coste_euros_moving_avg_3: rnd(0.10, 0.25, 3),
+                    coste_euros_moving_avg_6: rnd(0.10, 0.25, 3),
+                    coste_euros_moving_avg_24: rnd(0.10, 0.25, 3),
+                    week_avg: rnd(1, 2, 2),
+                    trend_diff: rnd(-0.5, 0.5, 2)
+                });
+            }
 
-/* 5. INICIALIZACIÓN                                                   */
-document.addEventListener('DOMContentLoaded',async ()=>{
-  try{
-    const [solarData,{prices,recs}] = await Promise.all([fetchSolarForecast(),Promise.resolve(mockPrices())]);
-    const labels=[...Array(24).keys()].map(h=>String(h).padStart(2,'0')+":00");
-    buildCharts(labels, solarData, prices, recs);
+            // Simulate API call
+            return new Promise(resolve => {
+                setTimeout(() => {
+                    resolve(payload.map(x => rnd(0.5, 3.5, 2)));
+                }, 500);
+            });
+        }
 
-    /* 6. ACTUALIZAR CARD «Solar Production» */
-    const todayTotal = solarData.reduce((a,b)=>a+b,0).toFixed(1);
-    document.getElementById('solarTodayKwh').textContent = `${todayTotal} kWh`;
-    const diffPct = rnd(-20,20,0);
-    const diffEl  = document.getElementById('solarTodayDiff');
-    diffEl.innerHTML = `${diffPct>=0?'<i class="fas fa-arrow-up mr-1"></i>':'<i class="fas fa-arrow-down mr-1"></i>'}${Math.abs(diffPct)}%`;
-    diffEl.classList.toggle('text-green-600', diffPct>=0);
-    diffEl.classList.toggle('text-red-600',   diffPct<0);
+        // Mock energy prices
+        function mockPrices() {
+            const p = [], r = [];
+            for (let i = 0; i < 24; i++) {
+                const v = rnd(0.10, 0.25, 2);
+                p.push(v);
+                r.push(v < 0.13 ? "buy" : v > 0.22 ? "sell" : "save");
+            }
+            return { prices: p, recs: r };
+        }
 
-  }catch(err){
-    console.error(err);
-    alert("No se pudieron cargar los datos de la API. Revisa la consola 📋");
-  }
-});
-</script>
+        // Build charts
+        function buildCharts(labels, solar, cons, prices, recs) {
+            // Solar Chart
+            new Chart(document.getElementById('solarChart').getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Solar (kWh)',
+                        data: solar,
+                        fill: true,
+                        tension: 0.3,
+                        backgroundColor: 'rgba(234, 179, 8, 0.2)',
+                        borderColor: 'rgba(234, 179, 8, 1)',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } }
+                }
+            });
+
+            // Consumption Chart
+            new Chart(document.getElementById('consumptionChart').getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Consumption (kWh)',
+                        data: cons,
+                        fill: true,
+                        tension: 0.3,
+                        backgroundColor: 'rgba(239, 68, 68, 0.2)',
+                        borderColor: 'rgba(239, 68, 68, 1)',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } }
+                }
+            });
+
+            // Energy Price Chart
+            new Chart(document.getElementById('energyChart').getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Price ($/kWh)',
+                        data: prices,
+                        backgroundColor: recs.map(r =>
+                            r === "buy" ? "rgba(59, 130, 246, 0.7)" :
+                            r === "sell" ? "rgba(16, 185, 129, 0.7)" : "rgba(156, 163, 175, 0.7)"),
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } }
+                }
+            });
+
+            // Historical Chart (combined solar and consumption)
+            new Chart(document.getElementById('historicalChart').getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Solar Production',
+                            data: solar,
+                            borderColor: 'rgba(234, 179, 8, 1)',
+                            backgroundColor: 'rgba(234, 179, 8, 0.1)',
+                            borderWidth: 2,
+                            tension: 0.3
+                        },
+                        {
+                            label: 'Energy Consumption',
+                            data: cons,
+                            borderColor: 'rgba(239, 68, 68, 1)',
+                            backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                            borderWidth: 2,
+                            tension: 0.3
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false
+                    }
+                }
+            });
+        }
+
+        // Execute recommendation animation
+        function executeRecommendation() {
+            const btn = document.getElementById('execRecBtn');
+            const btnText = document.getElementById('btnText');
+            const checkmark = document.getElementById('checkmark');
+
+            // Add animation class
+            btn.classList.add('success-animation');
+
+            // Change button text and show checkmark
+            setTimeout(() => {
+                btnText.textContent = 'Executed';
+                checkmark.classList.remove('hidden');
+
+                // Reset after animation
+                setTimeout(() => {
+                    btn.classList.remove('success-animation');
+                }, 1500);
+            }, 500);
+        }
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const [solarData, consData, { prices, recs }] = await Promise.all([
+                    fetchSolarForecast(),
+                    fetchConsumptionForecast(),
+                    Promise.resolve(mockPrices())
+                ]);
+
+                const labels = [...Array(24).keys()].map(h => String(h).padStart(2, '0') + ":00");
+                buildCharts(labels, solarData, consData, prices, recs);
+
+                // Update cards
+                const totalSolar = solarData.reduce((a, b) => a + b, 0).toFixed(1);
+                document.getElementById('solarTodayKwh').textContent = `${totalSolar} kWh`;
+                const solarDiff = rnd(5, 25);
+                document.getElementById('solarTodayDiff').innerHTML = `<i class="fas fa-arrow-up mr-1"></i>${solarDiff}%`;
+
+                const totalCons = consData.reduce((a, b) => a + b, 0).toFixed(1);
+                document.getElementById('consTodayKwh').textContent = `${totalCons} kWh`;
+                const consDiff = rnd(-10, 15);
+                const consDiffElement = document.getElementById('consTodayDiff');
+                if (consDiff >= 0) {
+                    consDiffElement.innerHTML = `<i class="fas fa-arrow-up mr-1"></i>${consDiff}%`;
+                    consDiffElement.className = "text-red-600 font-medium";
+                } else {
+                    consDiffElement.innerHTML = `<i class="fas fa-arrow-down mr-1"></i>${Math.abs(consDiff)}%`;
+                    consDiffElement.className = "text-green-600 font-medium";
+                }
+
+                // Decision: if production > consumption → sell, else → buy
+                const recText = totalSolar > totalCons
+                    ? `Sell ${(totalSolar - totalCons).toFixed(1)} kWh back to grid`
+                    : `Buy ${(totalCons - totalSolar).toFixed(1)} kWh from grid`;
+                document.getElementById('recommendationText').textContent = recText;
+
+                // Add event listener for execute button
+                document.getElementById('execRecBtn').addEventListener('click', executeRecommendation);
+
+            } catch (err) {
+                console.error(err);
+                alert("Error loading data from API");
+            }
+        });
+
+        // CSV export
+        document.getElementById('exportCsvBtn').addEventListener('click', () => {
+            const data = [
+                { ds: '2023-01-02 00:00:00', prod_placa: 10, cons_kwh: 8 },
+                { ds: '2023-01-02 01:00:00', prod_placa: 12, cons_kwh: 9 },
+                { ds: '2023-01-02 02:00:00', prod_placa: 15, cons_kwh: 10 },
+                { ds: '2023-01-02 03:00:00', prod_placa: 20, cons_kwh: 12 },
+                { ds: '2023-01-02 04:00:00', prod_placa: 25, cons_kwh: 15 },
+                { ds: '2023-01-02 05:00:00', prod_placa: 30, cons_kwh: 18 },
+                { ds: '2023-01-02 06:00:00', prod_placa: 35, cons_kwh: 20 },
+                { ds: '2023-01-02 07:00:00', prod_placa: 40, cons_kwh: 22 },
+                { ds: '2023-01-02 08:00:00', prod_placa: 45, cons_kwh: 25 },
+                { ds: '2023-01-02 09:00:00', prod_placa: 50, cons_kwh: 28 },
+                { ds: '2023-01-02 10:00:00', prod_placa: 55, cons_kwh: 30 },
+                { ds: '2023-01-02 11:00:00', prod_placa: 60, cons_kwh: 32 },
+                { ds: '2023-01-02 12:00:00', prod_placa: 65, cons_kwh: 35 },
+                { ds: '2023-01-02 13:00:00', prod_placa: 70, cons_kwh: 38 },
+                { ds: '2023-01-02 14:00:00', prod_placa: 75, cons_kwh: 40 },
+                { ds: '2023-01-02 15:00:00', prod_placa: 80, cons_kwh: 42 },
+                { ds: '2023-01-02 16:00:00', prod_placa: 85, cons_kwh: 45 },
+                { ds: '2023-01-02 17:00:00', prod_placa: 90, cons_kwh: 48 },
+                { ds: '2023-01-02 18:00:00', prod_placa: 95, cons_kwh: 50 },
+                { ds: '2023-01-02 19:00:00', prod_placa: 100, cons_kwh: 52 }
+            ];
+
+            const csv = Papa.unparse(data);
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'historical_data.csv';
+            a.click();
+        });
+
+        // CSV import
+        document.getElementById('importCsvBtn').addEventListener('click', () => {
+            document.getElementById('csvFileInput').click();
+        });
+
+        document.getElementById('csvFileInput').addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                Papa.parse(file, {
+                    header: true,
+                    complete: (results) => {
+                        console.log(results.data);
+                        alert("CSV file imported successfully!");
+                    }
+                });
+            }
+        });
+    </script>
 </body>
 </html>
