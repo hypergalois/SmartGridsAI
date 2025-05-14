@@ -1,18 +1,22 @@
-# API de Flask para Servir el Modelo MLflow
+# SGBA2 – Smart Grids Based Architecture 2
 
-Esta aplicación de Flask carga un modelo registrado en MLflow y expone un endpoint `/predict` para realizar predicciones a partir de datos enviados vía HTTP.
+**Modular MLOps pipeline for time-series forecasting and smart energy decisions (consumption, PV, pricing).**
 
-## Requisitos
+## 📌 Overview
 
-- **Python 3.9+**  
-- **pip**  
-- (Opcional) **Docker** para contenerización  
-- (Opcional) **Minikube** y **kubectl** para despliegue en Kubernetes
+SGBA2 is a modular, scalable system for forecasting energy consumption, photovoltaic (PV) production, and electricity pricing at the household level. Built on a full MLOps stack using MLRun and MinIO, the system enables data-driven energy decisions through versioned models and reproducible pipelines.
 
-## Instalación
+## ⚙️ Components
 
-1. **Clona el repositorio y navega a la carpeta `flask`:**
+### 🔋 Energy Forecasting Models
 
-   ```bash
-   git clone https://github.com/hypergalois/SmartGridsAI.git
-   cd tu_repositorio/flask
+- **Consumption**: Hourly prediction per household using `XGBoostRegressor`.
+- **Production (PV)**: Forecast per household using `Prophet` with holiday and weather regressors.
+- **Electricity Pricing**: National-level prediction based on temperature, demand, and generation data.
+
+### 🧠 Intelligent Architecture
+
+- **Modular pipelines** via MLRun.
+- **Model versioning, metrics logging, artifact storage** (e.g. `.pkl`, `.png`, `.csv`).
+- **MinIO** for dataset and model persistence.
+- **Future integration**: Reinforcement Learning agent for energy trade decisions
